@@ -60,14 +60,9 @@ namespace Business.Concrete
             var result = await _productDal.GetProductDetailDtoAsync(index, size);
             return new SuccessDataResult<IPaginate<ProductDetailDto>>(result, Messages.Listed);
         }
-        public async Task<IDataResult<IPaginate<ProductDetailDto>>> GetProductDetailDtoByCategoryIdAsync(string categoryId, int index, int size)
+        public async Task<IDataResult<IPaginate<ProductDetailDto>>> GetProductDetailDtoByCategoryIdAsync(int categoryId, int index, int size)
         {
             var result = await _productDal.GetProductDetailDtoByCategoryIdAsync(categoryId, index, size);
-            return new SuccessDataResult<IPaginate<ProductDetailDto>>(result, Messages.Listed);
-        }
-        public async Task<IDataResult<IPaginate<ProductDetailDto>>> GetProductDetailDtoByRelatedCategoryIdAsync(string categoryId, int index, int size)
-        {
-            var result = await _productDal.GetProductDetailDtoByRelatedCategoryIdAsync(categoryId, index, size);
             return new SuccessDataResult<IPaginate<ProductDetailDto>>(result, Messages.Listed);
         }
         public async Task<IDataResult<IPaginate<ProductDetailDto>>> GetRelatedProductsByProductId(int productId, int index = 0, int size = 20)
@@ -79,12 +74,13 @@ namespace Business.Concrete
             var result = await _productDal.GetProductDetailDtoByCategoryIdAsync(categoryId: product.CategoryId, index: index, size: size);
             return new SuccessDataResult<IPaginate<ProductDetailDto>>(result);
         }
-        public async Task<IDataResult<IPaginate<ProductDetailDto>>> GetRelatedProductsByCategoryId(string categoryId, int index = 0, int size = 20)
+        public async Task<IDataResult<IPaginate<ProductDetailDto>>> GetRelatedProductsByCategoryId(string categoryName, int index = 0, int size = 20)
         {
-            bool categoryExist = _categoryService.CategoryIsExist(categoryId);
-            if (categoryExist == false)
+            var categoryResult = _categoryService.Get(q => q.Name == categoryName);
+            if (categoryResult.Success || categoryResult.Data == null)
                 return new ErrorDataResult<IPaginate<ProductDetailDto>>(Messages.Error);
-            var result = await _productDal.GetProductDetailDtoByCategoryIdAsync(categoryId: categoryId, index: index, size: size);
+
+            var result = await _productDal.GetProductDetailDtoByCategoryIdAsync(categoryId: categoryResult.Data.Id, index: index, size: size);
             return new SuccessDataResult<IPaginate<ProductDetailDto>>(result);
         }
         public Task<List<ProductDetailDto>> GetPopularProducts(int index = 0, int size = 20)
@@ -171,11 +167,6 @@ namespace Business.Concrete
         }
         #endregion
         #region Rules
-        private IResult categoryIsExist(string categoryId)
-        {
-            var result = _categoryService.GetByCategoryIdAsync(categoryId);
-            return result != null ? new SuccessResult(Messages.Found) : new ErrorResult(Messages.NotFound);
-        }
         public int GetProductsCountFromDal()
         {
             int totalCount = _productDal.GetProductsCountFromDal();//46 ms avg.

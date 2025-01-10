@@ -84,6 +84,25 @@ namespace DataAccess.Concrete.EntityFramework.Contexts
             //    .HasMany(p => p.BasketItems)
             //    .WithOne(i => i.Product)
             //    .HasForeignKey(i => i.ProductId);
+
+            modelBuilder.Entity<Brand>()
+                .HasMany(p => p.Products)
+                .WithOne(i => i.Brand)
+                .HasForeignKey(i => i.BrandId);
+
+            // Category için Self-Referencing Configuration
+            modelBuilder.Entity<Category>()
+                .HasOne(c => c.ParentCategory)
+                .WithMany(c => c.SubCategories)
+                .HasForeignKey(c => c.ParentCategoryId)
+                .OnDelete(DeleteBehavior.Restrict); // Üst kategoriyi silerken alt kategorileri koru
+
+            // Category ve Product Arasındaki İlişki
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.Category)
+                .WithMany(c => c.Products)
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.Cascade); // Kategoriyi silerken ürünleri de sil
         }
     }
 }

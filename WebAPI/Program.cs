@@ -42,6 +42,11 @@ builder.Services.AddCoreRegistration();
 builder.Services.AddDataAccessRegistration();
 builder.Services.AddBusinessRegistration();
 builder.Services.AddControllers();
+//builder.Services.AddControllers()
+//    .AddJsonOptions(options =>
+//    {
+//        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+//    });
 #endregion
 #region Swagger
 builder.Services.AddSwaggerGen(option =>

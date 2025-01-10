@@ -1,11 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Entities.DTOs.Categories
+﻿namespace Entities.DTOs.Categories
 {
     public class AddCategoryDto
     {
         public string Name { get; set; }
-        [NotMapped]
-        public string? ParentCategoryId { get; set; }
+        public string Description { get; set; }
+        public int? ParentCategoryId { get; set; }
     }
 }

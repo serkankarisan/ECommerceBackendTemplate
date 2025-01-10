@@ -1,4 +1,5 @@
 ﻿using Core.Entities;
+using Core.Extensions;
 using Core.Utilities.Dynamic;
 using Core.Utilities.Paging;
 using Microsoft.EntityFrameworkCore;
@@ -15,8 +16,9 @@ namespace Core.DataAccess.EntityFramework
         {
             using (TContext context = new TContext())
             {
-                return filter == null ? context.Set<TEntity>().ToList()
-                    : context.Set<TEntity>().Where(filter).ToList();
+                var datas = filter == null ? context.Set<TEntity>()
+                    : context.Set<TEntity>().Where(filter);
+                return datas.ToClearCircularList();
             }
         }
         public virtual List<TEntity> GetAllWithInclude(Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>> include, Expression<Func<TEntity, bool>>? filter = null)

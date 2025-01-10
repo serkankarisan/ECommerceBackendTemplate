@@ -2,25 +2,24 @@
 using Core.Utilities.Results;
 using Entities.Concrete;
 using Entities.DTOs.Categories;
+using System.Linq.Expressions;
 
 namespace Business.Abstract
 {
     public interface ICategoryService
     {
         #region Queries
-        IDataResult<Category> Get(int id);
-        Task<IDataResult<IPaginate<Category>>> GetAllAsync(int index, int size);
-        Task<IDataResult<Category>> GetByCategoryIdAsync(string categoryId);
-        Task<IDataResult<List<Category>>> GetChildCategoriesByCategoryId(string categoryId);
-        bool CategoryIsExist(string categoryId);
+        IDataResult<CategoryDto> Get(Expression<Func<Category, bool>> filter);
+        Task<IDataResult<Paginate<CategoryDto>>> GetAllAsync(int index, int size);
+        Task<IDataResult<CategoryDto>> GetByCategoryIdAsync(int categoryId);
+        Task<IDataResult<List<CategoryDto>>> GetChildCategoriesByCategoryId(int categoryId);
+        bool CategoryIsExist(string name);
         #endregion
         #region Commands
-        IResult AddWithDto(AddCategoryDto addCategoryDto);
-        Category AddCategoryWithDto(AddCategoryDto addCategoryDto);
+        IDataResult<CategoryDto> AddWithDto(AddCategoryDto addCategoryDto);
         IResult Add(Category category);
         IResult Update(Category category);
         IResult Delete(int id);
-        IResult AddChildCategory(AddChildCategoryDto addChildCategoryDto);
         #endregion
     }
 }

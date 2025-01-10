@@ -22,20 +22,16 @@ namespace DataAccess.Concrete.EntityFramework
         {
             return await genericProductDetailDtoAsync(filter: null, index: index, size: size);
         }
-        public async Task<IPaginate<ProductDetailDto>> GetProductDetailDtoByCategoryIdAsync(string categoryId, int index, int size)
+        public async Task<IPaginate<ProductDetailDto>> GetProductDetailDtoByCategoryIdAsync(int categoryId, int index, int size)
         {
             return await genericProductDetailDtoAsync(filter: p => p.CategoryId == categoryId, index: index, size: size);
-        }
-        public async Task<IPaginate<ProductDetailDto>> GetProductDetailDtoByRelatedCategoryIdAsync(string categoryId, int index, int size)
-        {
-            return await genericProductDetailDtoAsync(filter: p => p.CategoryId.StartsWith(categoryId), index: index, size: size);
         }
         public async Task<IPaginate<ProductDetailDto>> genericProductDetailDtoAsync(Expression<Func<Product, bool>> filter = null, int index = 0, int size = 10, bool doPaginate = true)
         {
             using (var context = new ECommerceContext())
             {
                 var result = from p in filter == null ? context.Products : context.Products.Where(filter)
-                             join c in context.Categories on p.CategoryId equals c.CategoryId
+                             join c in context.Categories on p.CategoryId equals c.Id
                              join brand in context.Brands on p.BrandId equals brand.Id
                              let images = (from images in context.ProductImages where p.Id == images.ProductId select images.ImageUrl).ToList()
                              select new ProductDetailDto
@@ -44,11 +40,11 @@ namespace DataAccess.Concrete.EntityFramework
                                  Id = p.Id,
                                  Name = p.Name,
                                  Price = p.Price,
-                                 Stock = p.Stock,
+                                 StockQuantity = p.StockQuantity,
                                  CreatedDate = p.CreatedDate,
                                  UpdatedDate = p.UpdatedDate,
                                  //Category
-                                 CategoryId = c.CategoryId,
+                                 CategoryId = c.Id,
                                  CategoryName = c.Name,
                                  //Images
                                  ProductImages = images,
@@ -93,7 +89,7 @@ namespace DataAccess.Concrete.EntityFramework
                 var popularProducts = (
                     from r in result
                     join p in context.Products on r.Id equals p.Id
-                    join c in context.Categories on p.CategoryId equals c.CategoryId
+                    join c in context.Categories on p.CategoryId equals c.Id
                     join brand in context.Brands on p.BrandId equals brand.Id
                     let images = (
                         from images in context.ProductImages
@@ -105,8 +101,8 @@ namespace DataAccess.Concrete.EntityFramework
                         Id = p.Id,
                         Name = p.Name,
                         Price = p.Price,
-                        Stock = p.Stock,
-                        CategoryId = c.CategoryId,
+                        StockQuantity = p.StockQuantity,
+                        CategoryId = c.Id,
                         CategoryName = c.Name,
                         ProductImages = images,
                         BrandId = brand.Id,

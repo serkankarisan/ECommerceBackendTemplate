@@ -8,8 +8,8 @@ namespace DataAccess.Abstract
         #region Queries
         List<Category> GetAllParentCategory();
         int GetAllParentCategoryCount();
-        Task<List<Category>> GetChildCategoriesByCategoryId(string categoryId);
-        bool CategoryIsExist(string categoryId);
+        Task<List<Category>> GetChildCategoriesByCategoryId(int categoryId);
+        bool CategoryIsExist(string name);
         #endregion
     }
 }

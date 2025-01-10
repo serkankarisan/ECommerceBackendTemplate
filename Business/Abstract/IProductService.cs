@@ -15,12 +15,10 @@ namespace Business.Abstract
         IResult AddWithImage(AddProductWithImageDto addProductWithImageDto);
         IDataResult<IPaginate<Product>> GetListDynamic(int index, int size, Dynamic dynamic);
         Task<IDataResult<IPaginate<ProductDetailDto>>> GetProductDetailDtoAsync(int index, int size);
-        Task<IDataResult<IPaginate<ProductDetailDto>>> GetProductDetailDtoByCategoryIdAsync(string categoryId, int index, int size);
-        Task<IDataResult<IPaginate<ProductDetailDto>>> GetProductDetailDtoByRelatedCategoryIdAsync(string categoryId, int index, int size);
         int GetProductsCountFromDal();
         int GetProductsCountFromBussines();
         Task<IDataResult<IPaginate<ProductDetailDto>>> GetRelatedProductsByProductId(int productId, int index = 0, int size = 20);
-        Task<IDataResult<IPaginate<ProductDetailDto>>> GetRelatedProductsByCategoryId(string categoryId, int index = 0, int size = 20);
+        Task<IDataResult<IPaginate<ProductDetailDto>>> GetRelatedProductsByCategoryId(string categoryName, int index = 0, int size = 20);
         Task<List<ProductDetailDto>> GetPopularProducts(int index = 0, int size = 20);
         Task<IDataResult<ProductDetailDto>> GetProductDetailByIdAsync(int id);
         #endregion

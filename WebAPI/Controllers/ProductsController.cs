@@ -44,18 +44,6 @@ namespace WebAPI.Controllers
             var products = await _productService.GetProductDetailDtoAsync(index, size);
             return Ok(products);
         }
-        [HttpGet("get-product-details-dto-by-category-id")]
-        public async Task<IActionResult> GetProductDetailDtoByCategoryIdAsync(string categoryId, int index, int size)
-        {
-            var products = await _productService.GetProductDetailDtoByCategoryIdAsync(categoryId, index, size);
-            return Ok(products);
-        }
-        [HttpGet("get-product-details-dto-by-related-category-id")]
-        public async Task<IActionResult> GetProductDetailDtoByRelatedCategoryIdAsync(string categoryId, int index, int size)
-        {
-            var products = await _productService.GetProductDetailDtoByRelatedCategoryIdAsync(categoryId, index, size);
-            return Ok(products);
-        }
         [HttpGet("get-related-products-by-category-id")]
         public async Task<IActionResult> GetRelatedProductsByCategoryId(string categoryId, int index = 0, int size = 20)
         {

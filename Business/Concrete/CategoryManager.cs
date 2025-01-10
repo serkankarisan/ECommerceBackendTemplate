@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Business.Abstract;
 using Business.Constants;
+using Core.Extensions;
 using Core.Utilities.Paging;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
@@ -20,112 +21,53 @@ namespace Business.Concrete
             _mapper = mapper;
         }
         #region Queries
-        public IDataResult<Category> Get(int id)
+        public IDataResult<CategoryDto> Get(Expression<Func<Category, bool>> filter)
         {
-            var result = _categoryDal.Get(p => p.Id == id);
-            return result != null ? new SuccessDataResult<Category>(result, "") : new ErrorDataResult<Category>("Hata Oluştu");
+            var result = _mapper.Map<CategoryDto>(_categoryDal.Get(filter));
+            return result != null ? new SuccessDataResult<CategoryDto>(result, "") : new ErrorDataResult<CategoryDto>("Hata Oluştu");
         }
-        public async Task<IDataResult<IPaginate<Category>>> GetAllAsync(int index, int size)
+        public async Task<IDataResult<Paginate<CategoryDto>>> GetAllAsync(int index, int size)
         {
             var result = await _categoryDal.GetListAsync(index: index, size: size);
-            return result != null ? new SuccessDataResult<IPaginate<Category>>(result, Messages.Listed) : new ErrorDataResult<IPaginate<Category>>(Messages.NotListed);
+            return result != null ? new SuccessDataResult<Paginate<CategoryDto>>(result.ToMappedPaginate<Category, CategoryDto>(), Messages.Listed) : new ErrorDataResult<Paginate<CategoryDto>>(Messages.NotListed);
         }
-        public async Task<IDataResult<Category>> GetByCategoryIdAsync(string categoryId)
+        public async Task<IDataResult<CategoryDto>> GetByCategoryIdAsync(int categoryId)
         {
-            var result = await _categoryDal.GetAsync(p => p.CategoryId == categoryId);
-            return result != null ? new SuccessDataResult<Category>(result, Messages.Listed) : new ErrorDataResult<Category>(Messages.NotListed);
+            var result = await _categoryDal.GetAsync(p => p.Id == categoryId);
+            return result != null ? new SuccessDataResult<CategoryDto>(_mapper.Map<CategoryDto>(result), Messages.Listed) : new ErrorDataResult<CategoryDto>(Messages.NotListed);
         }
-        public async Task<IDataResult<List<Category>>> GetChildCategoriesByCategoryId(string categoryId)
+        public async Task<IDataResult<List<CategoryDto>>> GetChildCategoriesByCategoryId(int categoryId)
         {
             var result = await _categoryDal.GetChildCategoriesByCategoryId(categoryId);
-            return result != null ? new SuccessDataResult<List<Category>>(result, Messages.Listed) : new ErrorDataResult<List<Category>>(result, Messages.Error);
+            return result != null ? new SuccessDataResult<List<CategoryDto>>(_mapper.Map<List<CategoryDto>>(result), Messages.Listed) : new ErrorDataResult<List<CategoryDto>>(_mapper.Map<List<CategoryDto>>(result), Messages.Error);
         }
         #endregion
         #region Commands
-        public IResult AddWithDto(AddCategoryDto addCategoryDto)
+        public IDataResult<CategoryDto> AddWithDto(AddCategoryDto addCategoryDto)
         {
-            string categoryId = "";
-            if (addCategoryDto.ParentCategoryId == "")
+            if (addCategoryDto.ParentCategoryId != null)
             {
-                categoryId = (_categoryDal.GetAllParentCategoryCount() + 1).ToString();
-            }
-            else
-            {
-                Category parentCategory = _categoryDal.GetFirstOrDefault(k => k.CategoryId == addCategoryDto.ParentCategoryId);
-                if (parentCategory != null)
+                if (!_categoryDal.IsExist(p => p.Id == addCategoryDto.ParentCategoryId))
                 {
-                    int numberOfChildCategories = getCategoryTableCount(k => k.CategoryId.StartsWith(addCategoryDto.ParentCategoryId));
-                    categoryId = parentCategory.CategoryId + "-" + (numberOfChildCategories).ToString();
-                    if (_categoryDal.IsExist(p => p.CategoryId == categoryId))
-                    {
-                        int controlValue = 0;
-                        int period = 1;
-                        while (controlValue < 1)
-                        {
-                            period++;
-                            categoryId = parentCategory.CategoryId + "-" + (numberOfChildCategories + period).ToString();
-                            if (!_categoryDal.IsExist(p => p.CategoryId == categoryId))
-                            {
-                                controlValue++;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    return new ErrorResult(Messages.ParentCategoryNotFound);
+                    return new ErrorDataResult<CategoryDto>(Messages.ParentCategoryNotFound);
                 }
             }
 
             Category newCategory = new Category
             {
                 Name = addCategoryDto.Name,
-                CategoryId = categoryId
+                Description = addCategoryDto.Description,
+                ParentCategoryId = addCategoryDto.ParentCategoryId
             };
-            return Add(newCategory);
-        }
-        public Category AddCategoryWithDto(AddCategoryDto addCategoryDto)
-        {
-            string categoryId = "";
-            if (addCategoryDto.ParentCategoryId == "")
+            var result = Add(newCategory);
+            if (result.Success)
             {
-                categoryId = (_categoryDal.GetAllParentCategoryCount() + 1).ToString();
+                return new SuccessDataResult<CategoryDto>(_mapper.Map<CategoryDto>(newCategory), result.Message);
             }
             else
             {
-                Category parentCategory = _categoryDal.GetFirstOrDefault(k => k.CategoryId == addCategoryDto.ParentCategoryId);
-                if (parentCategory != null)
-                {
-                    int numberOfChildCategories = getCategoryTableCount(k => k.CategoryId.StartsWith(addCategoryDto.ParentCategoryId));
-                    categoryId = parentCategory.CategoryId + "-" + (numberOfChildCategories).ToString();
-                    if (_categoryDal.IsExist(p => p.CategoryId == categoryId))
-                    {
-                        int controlValue = 0;
-                        int period = 1;
-                        while (controlValue < 1)
-                        {
-                            period++;
-                            categoryId = parentCategory.CategoryId + "-" + (numberOfChildCategories + period).ToString();
-                            if (!_categoryDal.IsExist(p => p.CategoryId == categoryId))
-                            {
-                                controlValue++;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    return null;
-                }
+                return new ErrorDataResult<CategoryDto>(_mapper.Map<CategoryDto>(newCategory), result.Message);
             }
-
-            Category newCategory = new Category
-            {
-                Name = addCategoryDto.Name,
-                CategoryId = categoryId
-            };
-            Add(newCategory);
-            return newCategory;
         }
         public IResult Add(Category category)
         {
@@ -152,21 +94,11 @@ namespace Business.Concrete
             }
             return result ? new SuccessResult("Güncellendi") : new ErrorResult("Güncellenemedi hata oluştu");
         }
-        public IResult AddChildCategory(AddChildCategoryDto addChildCategoryDto)
-        {
-            var category = _mapper.Map<Category>(addChildCategoryDto);
-            var result = Add(category);
-            return result.Success ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
-        }
         #endregion
-        private int getCategoryTableCount(Expression<Func<Category, bool>> filter = null)
-        {
-            return _categoryDal.GetTableCount(filter);
-        }
 
-        public bool CategoryIsExist(string categoryId)
+        public bool CategoryIsExist(string name)
         {
-            return _categoryDal.CategoryIsExist(categoryId);
+            return _categoryDal.CategoryIsExist(name);
         }
     }
 }

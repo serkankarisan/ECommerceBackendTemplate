@@ -23,7 +23,7 @@ namespace WebAPI.Controllers
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpGet("get-child-categories-by-category-id")]
-        public async Task<IActionResult> GetChildCategoriesByCategoryId(string categoryId)
+        public async Task<IActionResult> GetChildCategoriesByCategoryId(int categoryId)
         {
             var result = await _categoryService.GetChildCategoriesByCategoryId(categoryId);
             return result.Success ? Ok(result) : BadRequest(result);
@@ -48,17 +48,12 @@ namespace WebAPI.Controllers
             var result = _categoryService.Delete(categoryId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
-        [HttpPost("add-child-category")]
-        public IActionResult AddChildCategory(AddChildCategoryDto addChildCategoryDto)
-        {
-            var result = _categoryService.AddChildCategory(addChildCategoryDto);
-            return result.Success ? Ok(result) : BadRequest(result);
-        }
         [HttpPost("add-categories-api")]
         public async Task<IActionResult> AddCategoriesApi()
         {
             //sadece ihtiyac duyulduğunda çalıştırılması gerek
             return null;
+
             HttpClient client = new HttpClient();
             var response = await client.GetAsync("https://api.trendyol.com/sapigw/product-categories");
 
@@ -66,16 +61,16 @@ namespace WebAPI.Controllers
             {
                 string responseContent = await response.Content.ReadAsStringAsync();
 
-                ApiRoot apiRoot = JsonSerializer.Deserialize<ApiRoot>(responseContent);
-                List<ApiCategory> apiCategories = apiRoot.categories;
+                dynamic apiRoot = JsonSerializer.Deserialize<dynamic>(responseContent);
+                List<dynamic> apiCategories = apiRoot.categories;
                 try
                 {
                     foreach (var category in apiCategories)
                     {
-                        var parentResult = _categoryService.AddCategoryWithDto(new AddCategoryDto { Name = category.name, ParentCategoryId = "" });
+                        var parentResult = _categoryService.AddWithDto(new AddCategoryDto { Name = category.name, ParentCategoryId = null });
                         if (parentResult != null)
                         {
-                            AddChildCategoryDto(category.subCategories, parentResult.CategoryId);
+
                         }
                     }
                 }
@@ -89,41 +84,6 @@ namespace WebAPI.Controllers
             return null;
 
         }
-        private void AddChildCategoryDto(List<ApiCategory> subCategories, string categoryId)
-        {
-            foreach (var category in subCategories)
-            {
-                var result = _categoryService.AddCategoryWithDto(new AddCategoryDto { Name = category.name, ParentCategoryId = categoryId });
-                foreach (var childCategory in category.subCategories)
-                {
-                    if (childCategory.subCategories != null)
-                    {
-                        AddChildCategoryDto(childCategory.subCategories, result.CategoryId);
-                    }
-                }
-            }
-        }
-
         #endregion
-    }
-    public class ApiCategory
-    {
-        public int id { get; set; }
-        public string name { get; set; }
-        public object parentId { get; set; }
-        public List<ApiCategory> subCategories { get; set; }
-    }
-
-    public class ApiRoot
-    {
-        public List<ApiCategory> categories { get; set; }
-    }
-
-    public class ApiSubCategory
-    {
-        public int id { get; set; }
-        public string name { get; set; }
-        public int parentId { get; set; }
-        public List<ApiSubCategory> subCategories { get; set; }
     }
 }

@@ -8,17 +8,12 @@ namespace DataAccess.Concrete.EntityFramework
 {
     public class EfCategoryDal : EfEntityRepositoryBase<Category, ECommerceContext>, ICategoryDal
     {
-        public bool CategoryIsExist(string categoryId)
+        public bool CategoryIsExist(string name)
         {
             using (ECommerceContext context = new ECommerceContext())
             {
-                var a = context.Categories.Count(p => p.CategoryId == categoryId) > 0;
+                return context.Categories.Any(p => p.Name == name);
             }
-            using (ECommerceContext context = new ECommerceContext())
-            {
-                var a = context.Categories.Any(p => p.CategoryId == categoryId);
-            }
-            return true;
         }
         #region Queries
         public List<Category> GetAllParentCategory()
@@ -26,7 +21,7 @@ namespace DataAccess.Concrete.EntityFramework
             using (ECommerceContext context = new ECommerceContext())
             {
                 IQueryable<Category> queryable = context.Set<Category>().AsQueryable();
-                return queryable.Where(p => !p.CategoryId.Contains("-")).ToList();
+                return queryable.Where(p => p.SubCategories.Count() > 0).ToList();
             }
         }
         public int GetAllParentCategoryCount()
@@ -34,15 +29,20 @@ namespace DataAccess.Concrete.EntityFramework
             using (ECommerceContext context = new ECommerceContext())
             {
                 IQueryable<Category> queryable = context.Set<Category>().AsQueryable();
-                return queryable.Where(p => !p.CategoryId.Contains("-")).Count();
+                return queryable.Count(p => p.SubCategories.Count() > 0);
             }
         }
-        public async Task<List<Category>> GetChildCategoriesByCategoryId(string categoryId)
+        public async Task<List<Category>> GetChildCategoriesByCategoryId(int categoryId)
         {
             using (ECommerceContext context = new ECommerceContext())
             {
                 IQueryable<Category> queryable = context.Set<Category>().AsQueryable();
-                return await queryable.Where(p => p.CategoryId.StartsWith($"{categoryId}-")).ToListAsync();
+                var category = await queryable.FirstOrDefaultAsync(p => p.Id == categoryId);
+                if (category != null)
+                {
+                    return category.SubCategories.ToList();
+                }
+                return new List<Category>();
             }
         }
         #endregion

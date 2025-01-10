@@ -1,10 +1,14 @@
-﻿using System.Text.Json;
+﻿using AutoMapper;
+using Core.Utilities.IoC;
+using Core.Utilities.Paging;
+using Microsoft.Extensions.DependencyInjection;
+using System.Text.Json;
 
 namespace Core.Extensions
 {
     public static class GeneralExtensions
     {
-        public static T ClearCircularReference<T>(T model)
+        public static T ClearCircularReference<T>(this T model)
         {
             var options = new JsonSerializerOptions
             {
@@ -15,6 +19,31 @@ namespace Core.Extensions
             // Serialize edip deserialize ederek circular referansı kaldırma
             var serializeModel = JsonSerializer.Serialize(model, options);
             return JsonSerializer.Deserialize<T>(serializeModel, options);
+        }
+        public static List<T> ToClearCircularList<T>(this IQueryable<T> items)
+        {
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true, // JSON çıktısını düzenli yazmak için
+                ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+            };
+
+            // Serialize edip deserialize ederek circular referansı kaldırma
+            var serializeModel = JsonSerializer.Serialize(items, options);
+            return JsonSerializer.Deserialize<List<T>>(serializeModel, options);
+        }
+        public static Paginate<TTarget> ToMappedPaginate<TSource, TTarget>(this IPaginate<TSource> paginateModel)
+        {
+            IMapper mapper = ServiceTool.ServiceProvider.GetRequiredService<IMapper>();
+            return new Paginate<TTarget>
+            {
+                From = paginateModel.From,
+                Index = paginateModel.Index,
+                Size = paginateModel.Size,
+                Count = paginateModel.Count,
+                Pages = paginateModel.Pages,
+                Items = mapper.Map<List<TTarget>>(paginateModel.Items)
+            };
         }
     }
 }
