@@ -7,8 +7,8 @@ using Business.Concrete.Addresses;
 using Business.Concrete.Auths;
 using Business.Concrete.Shoppings;
 using Business.Utilities.File;
-using Business.Utilities.JWT;
 using Business.Utilities.Mail;
+using Core.Utilities.Security.JWT;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Business
@@ -39,13 +39,11 @@ namespace Business
             serviceCollection.AddSingleton<IOrderItemService, OrderItemManager>();
             #endregion
             #endregion
-
             #region Infastructure
             serviceCollection.AddSingleton<IMailService, MailManager>();
             serviceCollection.AddSingleton<IProductImageUploadService, ProductImageUploadManager>();
             serviceCollection.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             serviceCollection.AddSingleton<ITokenHelper, JwtHelper>();
-
             #endregion
         }
     }

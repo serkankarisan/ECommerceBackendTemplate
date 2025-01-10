@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Net.Mail;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using System.Linq;
+﻿using Business.Abstract.Auths;
+using Core.Entities.Concrete.Auth;
 //using Business.ValidationRules.FluentValidations;
 //using Core.Aspects.Autofac.Validation;
-using Core.Entities.Concrete;
 using Core.Utilities.Results;
-using Business.Abstract.Auths;
-using Entities.Concrete.Auth;
+using Microsoft.Extensions.Configuration;
+using System.Net;
+using System.Net.Mail;
+using System.Text;
 
 namespace Business.Utilities.Mail
 {

@@ -1,14 +1,10 @@
 ﻿using AutoMapper;
 using Business.Abstract;
 using Business.Constants;
-using Core.Entities;
 using Core.Utilities.Paging;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Concrete;
-using Entities.DTOs.Users;
-using System.Diagnostics;
-using System.Drawing;
 
 namespace Business.Concrete
 {

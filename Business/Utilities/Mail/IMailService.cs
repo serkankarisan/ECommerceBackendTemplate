@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using Core.Entities.Concrete;
+﻿using Core.Entities.Concrete.Auth;
 using Core.Utilities.Results;
-using Entities.Concrete.Auth;
 
 namespace Business.Utilities.Mail
 {

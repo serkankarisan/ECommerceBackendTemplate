@@ -1,5 +1,4 @@
-﻿using Business.Abstract;
-using Business.Abstract.Shoppings;
+﻿using Business.Abstract.Shoppings;
 using Business.Constants;
 using Core.Utilities.Paging;
 using Core.Utilities.Results;

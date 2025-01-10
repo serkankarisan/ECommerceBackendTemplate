@@ -1,6 +1,6 @@
-﻿using Core.Entities.Concrete;
+﻿using Core.Entities.Concrete.Auth;
 
-namespace Core.Utilities.Security.Jwt
+namespace Core.Utilities.Security.JWT
 {
     public interface ITokenHelper
     {

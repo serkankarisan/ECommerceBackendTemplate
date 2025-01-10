@@ -1,11 +1,8 @@
 ﻿using Business.Abstract;
-using Core.Utilities.Paging;
-using Core.Utilities.Results;
 using Entities.Concrete;
 using Entities.DTOs.Categories;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace WebAPI.Controllers
 {
@@ -69,7 +66,7 @@ namespace WebAPI.Controllers
             {
                 string responseContent = await response.Content.ReadAsStringAsync();
 
-                ApiRoot apiRoot = JsonConvert.DeserializeObject<ApiRoot>(responseContent);
+                ApiRoot apiRoot = JsonSerializer.Deserialize<ApiRoot>(responseContent);
                 List<ApiCategory> apiCategories = apiRoot.categories;
                 try
                 {

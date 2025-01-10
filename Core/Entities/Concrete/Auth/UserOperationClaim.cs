@@ -1,6 +1,4 @@
-﻿using Core.Entities;
-
-namespace Entities.Concrete.Auth
+﻿namespace Core.Entities.Concrete.Auth
 {
     public class UserOperationClaim : BaseEntity
     {

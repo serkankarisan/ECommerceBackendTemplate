@@ -1,6 +1,5 @@
 ﻿using Business.Abstract;
 using Entities.DTOs.Products;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers

@@ -8,11 +8,9 @@ using Core.Extensions;
 using Core.Utilities.Security.Encryption;
 using Core.Utilities.Security.JWT;
 using DataAccess;
-using DataAccess.Concrete.EntityFramework;
+using DataAccess.Concrete.EntityFramework.Contexts;
 using Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -75,7 +73,7 @@ builder.Services.AddSwaggerGen(option =>
 });
 #endregion
 #region JWT Token
-var tokenOptions = builder.Configuration.GetSection("TokenOptions").Get<TokenOption>();
+var tokenOptions = builder.Configuration.GetSection("TokenOptions").Get<TokenOptions>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -91,7 +89,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 #endregion
-builder.Services.AddCors(opt => {
+builder.Services.AddCors(opt =>
+{
     opt.AddPolicy(name: myCors, policy =>
     {
         policy.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod();

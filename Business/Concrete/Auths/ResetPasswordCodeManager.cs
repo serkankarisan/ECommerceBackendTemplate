@@ -1,10 +1,8 @@
 ﻿using Business.Abstract.Auths;
 using Business.Constants;
-using Business.Utilities.Mail;
-using Core.Entities.Concrete;
+using Core.Entities.Concrete.Auth;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
-using Entities.Concrete.Auth;
 using Entities.DTOs.Users;
 
 namespace Business.Concrete.Auths

@@ -18,7 +18,7 @@ namespace Core.Utilities.Business
                     return logic; // Başarısız olan ilk kuralı döndür
                 }
             }
-            return new SuccessResult(); // Tüm kurallar başarılıysa
+            return null;
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Core.Utilities.Business
                     return result; // Başarısız olan ilk kuralı döndür
                 }
             }
-            return new SuccessResult(); // Tüm kurallar başarılıysa
+            return null;
         }
     }
 }

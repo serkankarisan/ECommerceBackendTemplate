@@ -1,6 +1,6 @@
-﻿using Core.Utilities.Results;
+﻿using Core.Entities.Concrete.Auth;
+using Core.Utilities.Results;
 using Core.Utilities.Security.JWT;
-using Entities.Concrete.Auth;
 using Entities.DTOs.Users;
 
 namespace Business.Abstract.Auths

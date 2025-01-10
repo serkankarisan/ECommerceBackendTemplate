@@ -2,6 +2,8 @@
 {
     public class DataResult<T> : Result, IDataResult<T>
     {
+        public T Data { get; }
+
         /// <summary>
         /// IDataResult'ın temel implementasyonu.
         /// </summary>
@@ -17,7 +19,5 @@
         {
             Data = data;
         }
-
-        public T Data { get; }
     }
 }

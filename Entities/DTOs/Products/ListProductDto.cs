@@ -1,6 +1,5 @@
 ﻿using Core.Entities;
 using Entities.Concrete;
-using Microsoft.AspNetCore.Http;
 
 namespace Entities.DTOs.Products
 {

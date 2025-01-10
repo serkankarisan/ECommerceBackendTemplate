@@ -1,13 +1,10 @@
-﻿using Core.DataAccess;
+﻿using Core.DataAccess.EntityFramework;
+using Core.Utilities.Paging;
 using DataAccess.Abstract;
+using DataAccess.Concrete.EntityFramework.Contexts;
 using Entities.Concrete;
 using Entities.DTOs.Products;
 using System.Linq.Expressions;
-using Core.Utilities.Paging;
-using Core.Extensions;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using Core.Utilities.Results;
 
 namespace DataAccess.Concrete.EntityFramework
 {
@@ -67,7 +64,7 @@ namespace DataAccess.Concrete.EntityFramework
         }
         public async Task<ProductDetailDto> GetProductDetailByIdAsync(int id)
         {
-            var result = await genericProductDetailDtoAsync(filter: p => p.Id == id,doPaginate:false);
+            var result = await genericProductDetailDtoAsync(filter: p => p.Id == id, doPaginate: false);
             return result.Items.Count != 0 ? result.Items.First() : null;
         }
         public int GetProductsCountFromDal()

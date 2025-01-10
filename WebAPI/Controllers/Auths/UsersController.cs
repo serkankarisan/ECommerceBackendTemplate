@@ -1,5 +1,5 @@
 ﻿using Business.Abstract.Auths;
-using Entities.Concrete.Auth;
+using Core.Entities.Concrete.Auth;
 using Entities.DTOs.Users;
 using Microsoft.AspNetCore.Mvc;
 

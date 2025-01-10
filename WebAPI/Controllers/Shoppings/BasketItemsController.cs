@@ -1,9 +1,6 @@
-﻿using Business.Abstract;
-using Business.Abstract.Shoppings;
-using Core.Utilities.Results;
+﻿using Business.Abstract.Shoppings;
 using Entities.Concrete.Shoppings;
 using Entities.DTOs.Shoppings;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers.Shopping

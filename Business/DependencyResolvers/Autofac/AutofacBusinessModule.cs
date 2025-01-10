@@ -1,7 +1,7 @@
 ﻿using Autofac;
-using Castle.DynamicProxy;
 using Autofac.Extras.DynamicProxy;
-using Core.Utilities.Interseptors;
+using Castle.DynamicProxy;
+using Core.Utilities.Interceptors;
 
 namespace Business.DependencyResolvers.Autofac
 {

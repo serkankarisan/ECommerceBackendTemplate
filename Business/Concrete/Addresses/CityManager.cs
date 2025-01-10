@@ -1,11 +1,9 @@
-﻿using AutoMapper;
-using Business.Abstract.Addresses;
+﻿using Business.Abstract.Addresses;
 using Business.Constants;
 using Core.Utilities.Paging;
 using Core.Utilities.Results;
 using DataAccess.Abstract.AddressAbstract;
 using Entities.Concrete.AddressConcrete;
-using Entities.DTOs.Addresses;
 
 namespace Business.Concrete.Addresses
 {

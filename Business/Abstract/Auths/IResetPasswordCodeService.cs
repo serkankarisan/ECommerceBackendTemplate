@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Core.Entities.Concrete;
+﻿using Core.Entities.Concrete.Auth;
 using Core.Utilities.Results;
-using Entities.Concrete.Auth;
 using Entities.DTOs.Users;
 
 namespace Business.Abstract.Auths

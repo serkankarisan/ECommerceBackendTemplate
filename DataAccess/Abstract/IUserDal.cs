@@ -1,9 +1,9 @@
 ﻿using Core.DataAccess;
-using Entities.Concrete.Auth;
+using Core.Entities.Concrete.Auth;
 
 namespace DataAccess.Abstract
 {
-    public interface IUserDal:IEntityRepository<User>
+    public interface IUserDal : IEntityRepository<User>
     {
         List<OperationClaim> GetClaims(User user);
     }

@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Core.DataAccess;
-using Core.Entities.Concrete;
+﻿using Core.DataAccess.EntityFramework;
+using Core.Entities.Concrete.Auth;
 using DataAccess.Abstract;
-using Entities.Concrete;
-using Entities.Concrete.Auth;
-using Microsoft.EntityFrameworkCore;
+using DataAccess.Concrete.EntityFramework.Contexts;
 
 namespace DataAccess.Concrete.EntityFramework.Auths
 {

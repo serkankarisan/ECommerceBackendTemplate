@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Core.DataAccess;
-using Entities.Concrete.Auth;
+﻿using Core.DataAccess;
+using Core.Entities.Concrete.Auth;
 
 namespace DataAccess.Abstract
 {
-    public interface IResetPasswordCodeDal: IEntityRepository<ResetPasswordCode>
+    public interface IResetPasswordCodeDal : IEntityRepository<ResetPasswordCode>
     {
     }
 }

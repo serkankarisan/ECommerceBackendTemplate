@@ -1,8 +1,6 @@
 ﻿using Business.Abstract.Addresses;
-using Entities.Concrete;
 using Entities.Concrete.AddressConcrete;
 using Entities.DTOs.Addresses;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers.Addresses

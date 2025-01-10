@@ -7,8 +7,6 @@ using DataAccess.Abstract;
 using Entities.Concrete;
 using Entities.DTOs.Categories;
 using System.Linq.Expressions;
-using Newtonsoft.Json;
-
 
 namespace Business.Concrete
 {
@@ -168,7 +166,7 @@ namespace Business.Concrete
 
         public bool CategoryIsExist(string categoryId)
         {
-           return _categoryDal.CategoryIsExist(categoryId);
+            return _categoryDal.CategoryIsExist(categoryId);
         }
     }
 }

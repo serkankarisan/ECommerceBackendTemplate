@@ -1,8 +1,8 @@
 ﻿using Business.Abstract.Auths;
 using Business.Constants;
+using Core.Entities.Concrete.Auth;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
-using Entities.Concrete.Auth;
 
 namespace Business.Concrete.Auths
 {

@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Entities.DTOs.Categories
+﻿namespace Entities.DTOs.Categories
 {
     public class AddChildCategoryDto
     {

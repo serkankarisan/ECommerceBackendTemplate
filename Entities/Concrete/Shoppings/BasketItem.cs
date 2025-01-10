@@ -1,5 +1,4 @@
 ﻿using Core.Entities;
-using Entities.Concrete.Auth;
 
 namespace Entities.Concrete.Shoppings
 {

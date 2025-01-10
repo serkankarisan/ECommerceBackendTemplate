@@ -1,9 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 
 namespace Core.Extensions
 {
@@ -11,12 +6,15 @@ namespace Core.Extensions
     {
         public static T ClearCircularReference<T>(T model)
         {
-            var serializeModel = JsonConvert.SerializeObject(model, Formatting.Indented,
-                           new JsonSerializerSettings
-                           {
-                               ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                           });
-            return JsonConvert.DeserializeObject<T>(serializeModel);
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true, // JSON çıktısını düzenli yazmak için
+                ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+            };
+
+            // Serialize edip deserialize ederek circular referansı kaldırma
+            var serializeModel = JsonSerializer.Serialize(model, options);
+            return JsonSerializer.Deserialize<T>(serializeModel, options);
         }
     }
 }

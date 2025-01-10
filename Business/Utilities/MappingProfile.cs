@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Business.Concrete;
 using Entities.Concrete;
 using Entities.Concrete.AddressConcrete;
 using Entities.Concrete.Shoppings;
@@ -7,11 +6,6 @@ using Entities.DTOs.Addresses;
 using Entities.DTOs.Categories;
 using Entities.DTOs.Products;
 using Entities.DTOs.Shoppings;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Business.Utilities
 {

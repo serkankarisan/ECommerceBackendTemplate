@@ -1,21 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
-using Core.Entities;
-using Core.Entities.Concrete;
+﻿using Core.Entities;
+using Core.Entities.Concrete.Auth;
 using Entities.Concrete;
 using Entities.Concrete.AddressConcrete;
-using Entities.Concrete.Auth;
 using Entities.Concrete.Shoppings;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 
-namespace DataAccess.Concrete.EntityFramework
+namespace DataAccess.Concrete.EntityFramework.Contexts
 {
     public class ECommerceContext : DbContext
     {

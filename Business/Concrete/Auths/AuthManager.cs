@@ -1,14 +1,11 @@
 ﻿using Business.Abstract.Auths;
 using Business.Constants;
-using Business.Utilities.JWT;
 using Business.Utilities.Mail;
-using Business.ValidationRules.FluentValidations;
-using Core.Aspects.Autofac.Validation;
+using Core.Entities.Concrete.Auth;
 using Core.Utilities.Results;
 using Core.Utilities.Security.Hashing;
 using Core.Utilities.Security.JWT;
 using DataAccess.Abstract;
-using Entities.Concrete.Auth;
 using Entities.Concrete.Shoppings;
 using Entities.DTOs.Users;
 

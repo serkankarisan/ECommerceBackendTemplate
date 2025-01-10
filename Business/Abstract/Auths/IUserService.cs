@@ -1,5 +1,5 @@
-﻿using Core.Utilities.Results;
-using Entities.Concrete.Auth;
+﻿using Core.Entities.Concrete.Auth;
+using Core.Utilities.Results;
 
 
 namespace Business.Abstract.Auths

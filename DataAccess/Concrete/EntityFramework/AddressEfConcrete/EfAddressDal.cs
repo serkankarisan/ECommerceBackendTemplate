@@ -1,13 +1,7 @@
-﻿using Core.DataAccess;
-using DataAccess.Abstract;
+﻿using Core.DataAccess.EntityFramework;
 using DataAccess.Abstract.AddressAbstract;
-using Entities.Concrete;
+using DataAccess.Concrete.EntityFramework.Contexts;
 using Entities.Concrete.AddressConcrete;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccess.Concrete.EntityFramework.AddressEfConcrete
 {

@@ -1,9 +1,4 @@
-﻿using Core.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Entities.Concrete.Auth
+﻿namespace Core.Entities.Concrete.Auth
 {
     public class ResetPasswordCode : BaseEntity
     {

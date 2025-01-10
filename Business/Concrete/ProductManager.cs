@@ -1,13 +1,11 @@
 ﻿using AutoMapper;
 using Business.Abstract;
-using Business.BusinessAspects.Autofac;
 using Business.Constants;
 using Business.Utilities.File;
 using Business.ValidationRules.FluentValidations;
 using Core.Aspects.Autofac.Caching;
 using Core.Aspects.Autofac.Transaction;
 using Core.Aspects.Autofac.Validation;
-using Core.Utilities.Business;
 using Core.Utilities.Dynamic;
 using Core.Utilities.Paging;
 using Core.Utilities.Results;
@@ -96,7 +94,7 @@ namespace Business.Concrete
         public async Task<IDataResult<ProductDetailDto>> GetProductDetailByIdAsync(int id)
         {
             var result = await _productDal.GetProductDetailByIdAsync(id);
-            return result!=null?new SuccessDataResult<ProductDetailDto>(result):new ErrorDataResult<ProductDetailDto>(Messages.NotFound);
+            return result != null ? new SuccessDataResult<ProductDetailDto>(result) : new ErrorDataResult<ProductDetailDto>(Messages.NotFound);
         }
         #endregion
         #region Commands

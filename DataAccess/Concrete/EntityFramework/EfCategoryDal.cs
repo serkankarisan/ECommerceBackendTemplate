@@ -1,11 +1,8 @@
-﻿using Core.DataAccess;
-using Core.Entities;
-using Core.Extensions;
-using Core.Utilities.Dynamic;
+﻿using Core.DataAccess.EntityFramework;
 using DataAccess.Abstract;
+using DataAccess.Concrete.EntityFramework.Contexts;
 using Entities.Concrete;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace DataAccess.Concrete.EntityFramework
 {

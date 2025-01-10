@@ -1,7 +1,4 @@
 ﻿using Core.Entities;
-using Entities.Concrete;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Entities.DTOs.Products
 {
