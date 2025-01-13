@@ -1,6 +1,7 @@
 ﻿using Core.Utilities.Paging;
 using Core.Utilities.Results;
 using Entities.Concrete.AddressConcrete;
+using System.Linq.Expressions;
 
 namespace Business.Abstract.Addresses
 {
@@ -8,7 +9,7 @@ namespace Business.Abstract.Addresses
     {
         #region Queries
         Task<IDataResult<IPaginate<Country>>> GetAllAsync(int index, int size);
-        Task<IDataResult<Country>> GetByIdAsync(int id);
+        Task<IDataResult<Country>> GetAsync(Expression<Func<Country, bool>> filter);
         #endregion
         #region Commands
         Task<IResult> AddAsync(Country country);

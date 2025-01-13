@@ -1,10 +1,12 @@
 ﻿using Business.Abstract;
 using Business.Constants;
 using Business.Utilities.File;
+using Core.Aspects.Autofac.Caching;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Concrete;
 using Entities.DTOs.Products;
+using System.Linq.Expressions;
 
 namespace Business.Concrete
 {
@@ -19,56 +21,79 @@ namespace Business.Concrete
             _productImageUploadService = productImageUploadService;
         }
         #region Queries
-        public IDataResult<ProductImage> Get(int id)
+        [CacheAspect(60)]
+        public async Task<IDataResult<ProductImage>> GetAsync(Expression<Func<ProductImage, bool>> filter)
         {
-            ProductImage result = _productImageDal.Get(p => p.Id == id);
+            ProductImage result = await _productImageDal.GetAsync(filter);
             return result != null ? new SuccessDataResult<ProductImage>(result, Messages.Listed) : new ErrorDataResult<ProductImage>(Messages.NotListed);
         }
-        public IDataResult<List<ProductImage>> GetAll()
+        [CacheAspect(60)]
+        public async Task<IDataResult<List<ProductImage>>> GetAllAsync()
         {
-            List<ProductImage> result = _productImageDal.GetAll();
+            List<ProductImage> result = await _productImageDal.GetAllAsync();
             return result != null ? new SuccessDataResult<List<ProductImage>>(result, Messages.Listed) : new ErrorDataResult<List<ProductImage>>(Messages.NotListed);
         }
         #endregion
         #region Commands
-        public IResult Add(ProductImage productImage)
+        [CacheRemoveAspect(@"
+        Business.Abstract.IProductImageService.GetAllAsync,
+        Business.Abstract.IProductImageService.GetAsync
+        ")]
+        public async Task<IResult> AddAsync(ProductImage productImage)
         {
-            bool result = _productImageDal.Add(productImage);
-            return result ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
+            int result = await _productImageDal.AddAsync(productImage);
+            return result > 0 ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
         }
-        public IResult Delete(int id)
+        [CacheRemoveAspect(@"
+        Business.Abstract.IProductImageService.GetAllAsync,
+        Business.Abstract.IProductImageService.GetAsync
+        ")]
+        public async Task<IResult> DeleteAsync(int id)
         {
-            ProductImage productImage = _productImageDal.Get(p => p.Id == id);
+            ProductImage productImage = await _productImageDal.GetAsync(p => p.Id == id);
             if (productImage == null)
                 return new ErrorResult(Messages.NotFound);
-            bool result = _productImageDal.Delete(productImage);
+            bool result = await _productImageDal.DeleteAsync(productImage);
             return result ? new SuccessResult(Messages.Deleted) : new ErrorResult(Messages.NotDeleted);
         }
-        public IResult Update(ProductImage productImage)
+        [CacheRemoveAspect(@"
+        Business.Abstract.IProductImageService.GetAllAsync,
+        Business.Abstract.IProductImageService.GetAsync
+        ")]
+        public async Task<IResult> UpdateAsync(ProductImage productImage)
         {
-            ProductImage getProductImage = _productImageDal.Get(p => p.Id == productImage.Id);
-            if (getProductImage == null)
+            bool isExists = await _productImageDal.IsExistAsync(p => p.Id == productImage.Id);
+            if (!isExists)
                 return new ErrorResult(Messages.NotFound);
-            bool result = _productImageDal.Update(productImage);
+            bool result = await _productImageDal.UpdateAsync(productImage);
             return result ? new SuccessResult(Messages.Updated) : new ErrorResult(Messages.NotUpdated);
         }
-        public IResult AddProductImageByProductId(AddProductImageDto addProductImageDto)
+        [CacheRemoveAspect(@"
+        Business.Abstract.IProductImageService.GetAllAsync,
+        Business.Abstract.IProductImageService.GetAsync
+        ")]
+        public async Task<IResult> AddProductImageByProductIdAsync(AddProductImageDto addProductImageDto)
         {
-            bool uploadingResult = false;
+            int uploadingResult = 0;
             for (int i = 0; i < addProductImageDto.IFormFiles.Count(); i++)
             {
                 (string, bool) imageResult = _productImageUploadService.AddImage(addProductImageDto.IFormFiles[i]);
                 if (imageResult.Item2)
                 {
-                    uploadingResult = Add(new ProductImage { ImageUrl = imageResult.Item1, Name = imageResult.Item1, ProductId = addProductImageDto.ProductId }).Success;
+                    uploadingResult = await _productImageDal.AddAsync(new ProductImage { ImageUrl = imageResult.Item1, Name = imageResult.Item1, ProductId = addProductImageDto.ProductId });
                 }
             }
-            return uploadingResult ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.Error);
+            return uploadingResult > 0 ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.Error);
         }
         //Todo: image url config den alınabilir veya başka bir çözüm olabilir. değişecek.
-        public IResult AddDefaultProductImageByProductId(int productId)
+        [CacheRemoveAspect(@"
+        Business.Abstract.IProductImageService.GetAllAsync,
+        Business.Abstract.IProductImageService.GetAsync
+        ")]
+        public async Task<IResult> AddDefaultProductImageByProductIdAsync(int productId)
         {
-            return Add(new ProductImage { ImageUrl = "\\ProductImages\\defaultFile.jpg", Name = "defaultFile.jpg", ProductId = productId });
+            int result = await _productImageDal.AddAsync(new ProductImage { ImageUrl = "\\ProductImages\\defaultFile.jpg", Name = "defaultFile.jpg", ProductId = productId });
+            return result > 0 ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
         }
         #endregion
     }

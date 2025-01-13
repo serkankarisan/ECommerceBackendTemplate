@@ -2,6 +2,7 @@
 using Core.Utilities.Results;
 using Entities.Concrete.Shoppings;
 using Entities.DTOs.Shoppings;
+using System.Linq.Expressions;
 
 namespace Business.Abstract.Shoppings
 {
@@ -11,6 +12,6 @@ namespace Business.Abstract.Shoppings
         Task<IResult> UpdateAsync(Basket brand);
         Task<IResult> DeleteAsync(int id);
         Task<IDataResult<IPaginate<Basket>>> GetAllAsync(int index, int size);
-        Task<IDataResult<Basket>> GetByIdAsync(int id);
+        Task<IDataResult<Basket>> GetAsync(Expression<Func<Basket, bool>> filter);
     }
 }

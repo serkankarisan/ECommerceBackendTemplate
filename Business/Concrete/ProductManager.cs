@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using Business.Abstract;
+using Business.BusinessAspects.Autofac;
 using Business.Constants;
 using Business.Utilities.File;
 using Business.ValidationRules.FluentValidations;
 using Core.Aspects.Autofac.Caching;
-using Core.Aspects.Autofac.Transaction;
 using Core.Aspects.Autofac.Validation;
 using Core.Utilities.Dynamic;
 using Core.Utilities.Paging;
@@ -12,6 +12,7 @@ using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Concrete;
 using Entities.DTOs.Products;
+using System.Linq.Expressions;
 
 namespace Business.Concrete
 {
@@ -32,61 +33,69 @@ namespace Business.Concrete
             _categoryService = categoryService;
         }
         #region Queries
-        [TransactionScopeAspect]
-        [CacheRemoveAspect("IProductService.Get")]
-        public IDataResult<Product> Get(int id)
+        [CacheAspect(60)]
+        public async Task<IDataResult<Product>> GetAsync(Expression<Func<Product, bool>> filter)
         {
-            Product product = _productDal.Get(p => p.Id == id);
+            Product product = await _productDal.GetAsync(filter);
             return product != null ? new SuccessDataResult<Product>(product, "") : new ErrorDataResult<Product>("Hata Oluştu");
         }
-        //[CacheAspect]
-        //[SecuredOperation("getall")]
+        [CacheAspect(60)]
+        [SecuredOperation("getall")]
         public async Task<IDataResult<IPaginate<Product>>> GetAllAsync(int index = 0, int size = 50)
         {
             IPaginate<Product> result = await _productDal.GetListAsync(index: index, size: size);
             return result != null ? new SuccessDataResult<IPaginate<Product>>(result, "Listelendi") : new ErrorDataResult<IPaginate<Product>>("Hata Oluştu");
         }
-        public IDataResult<Product> GetMostExpensiveProduct()
+        [CacheAspect(60)]
+        public async Task<IDataResult<Product>> GetMostExpensiveProductAsync()
         {
-            Product result = _productDal.GetMostExpensiveProduct();
+            Product result = await _productDal.GetMostExpensiveProductAsync();
             return result != null ? new SuccessDataResult<Product>(result, "") : new ErrorDataResult<Product>("Hata Oluştu");
         }
-        public IDataResult<IPaginate<Product>> GetListDynamic(int index, int size, Dynamic dynamic)
+        [CacheAspect(60)]
+        public async Task<IDataResult<IPaginate<Product>>> GetListDynamicAsync(int index, int size, Dynamic dynamic)
         {
-            return new SuccessDataResult<IPaginate<Product>>(_productDal.GetListByDynamic(size: size, index: index, dynamic: dynamic), Messages.Listed);
+            IPaginate<Product> result = await _productDal.GetListByDynamicAsync(size: size, index: index, dynamic: dynamic);
+            return result != null ? new SuccessDataResult<IPaginate<Product>>(result, Messages.Listed) : new ErrorDataResult<IPaginate<Product>>(Messages.NotListed);
         }
+        [CacheAspect(60)]
         public async Task<IDataResult<IPaginate<ProductDetailDto>>> GetProductDetailDtoAsync(int index, int size)
         {
             IPaginate<ProductDetailDto> result = await _productDal.GetProductDetailDtoAsync(index, size);
-            return new SuccessDataResult<IPaginate<ProductDetailDto>>(result, Messages.Listed);
+            return result != null ? new SuccessDataResult<IPaginate<ProductDetailDto>>(result, Messages.Listed) : new ErrorDataResult<IPaginate<ProductDetailDto>>(Messages.NotListed);
         }
+        [CacheAspect(60)]
         public async Task<IDataResult<IPaginate<ProductDetailDto>>> GetProductDetailDtoByCategoryIdAsync(int categoryId, int index, int size)
         {
             IPaginate<ProductDetailDto> result = await _productDal.GetProductDetailDtoByCategoryIdAsync(categoryId, index, size);
-            return new SuccessDataResult<IPaginate<ProductDetailDto>>(result, Messages.Listed);
+            return result != null ? new SuccessDataResult<IPaginate<ProductDetailDto>>(result, Messages.Listed) : new ErrorDataResult<IPaginate<ProductDetailDto>>(Messages.NotListed);
         }
-        public async Task<IDataResult<IPaginate<ProductDetailDto>>> GetRelatedProductsByProductId(int productId, int index = 0, int size = 20)
+        [CacheAspect(60)]
+        public async Task<IDataResult<IPaginate<ProductDetailDto>>> GetRelatedProductsByProductIdAsync(int productId, int index = 0, int size = 20)
         {
-            Product product = _productDal.Get(p => p.Id == productId);
+            Product product = await _productDal.GetAsync(p => p.Id == productId);
             if (product == null)
                 return new ErrorDataResult<IPaginate<ProductDetailDto>>(Messages.Error);
 
             IPaginate<ProductDetailDto> result = await _productDal.GetProductDetailDtoByCategoryIdAsync(categoryId: product.CategoryId, index: index, size: size);
-            return new SuccessDataResult<IPaginate<ProductDetailDto>>(result);
+            return result != null ? new SuccessDataResult<IPaginate<ProductDetailDto>>(result, Messages.Listed) : new ErrorDataResult<IPaginate<ProductDetailDto>>(Messages.NotListed);
         }
-        public async Task<IDataResult<IPaginate<ProductDetailDto>>> GetRelatedProductsByCategoryId(string categoryName, int index = 0, int size = 20)
+        [CacheAspect(60)]
+        public async Task<IDataResult<IPaginate<ProductDetailDto>>> GetRelatedProductsByCategoryNameAsync(string categoryName, int index = 0, int size = 20)
         {
             IDataResult<Entities.DTOs.Categories.CategoryDto> categoryResult = await _categoryService.GetAsync(q => q.Name == categoryName);
             if (categoryResult.Success || categoryResult.Data == null)
                 return new ErrorDataResult<IPaginate<ProductDetailDto>>(Messages.Error);
 
             IPaginate<ProductDetailDto> result = await _productDal.GetProductDetailDtoByCategoryIdAsync(categoryId: categoryResult.Data.Id, index: index, size: size);
-            return new SuccessDataResult<IPaginate<ProductDetailDto>>(result);
+            return result != null ? new SuccessDataResult<IPaginate<ProductDetailDto>>(result, Messages.Listed) : new ErrorDataResult<IPaginate<ProductDetailDto>>(Messages.NotListed);
         }
-        public Task<List<ProductDetailDto>> GetPopularProducts(int index = 0, int size = 20)
+        [CacheAspect(60)]
+        public async Task<List<ProductDetailDto>> GetPopularProductsAsync(int index = 0, int size = 20)
         {
-            return _productDal.GetPopularProducts(index: index, size: size);
+            return await _productDal.GetPopularProductsAsync(index: index, size: size);
         }
+        [CacheAspect(60)]
         public async Task<IDataResult<ProductDetailDto>> GetProductDetailByIdAsync(int id)
         {
             ProductDetailDto result = await _productDal.GetProductDetailByIdAsync(id);
@@ -95,11 +104,24 @@ namespace Business.Concrete
         #endregion
         #region Commands
         [ValidationAspect(typeof(ProductValidator))]
-        public IResult Add(AddProductDto addProductDto)
+        [CacheRemoveAspect(@"
+        Business.Abstract.IProductService.GetAsync,
+        Business.Abstract.IProductService.GetAllAsync,
+        Business.Abstract.IProductService.GetMostExpensiveProductAsync,
+        Business.Abstract.IProductService.GetListDynamicAsync,
+        Business.Abstract.IProductService.GetProductDetailDtoAsync,
+        Business.Abstract.IProductService.GetProductDetailDtoByCategoryIdAsync,
+        Business.Abstract.IProductService.GetRelatedProductsByProductIdAsync,
+        Business.Abstract.IProductService.GetRelatedProductsByCategoryNameAsync,
+        Business.Abstract.IProductService.GetPopularProductsAsync,
+        Business.Abstract.IProductService.GetProductDetailByIdAsync,
+        Business.Abstract.IProductService.GetProductsCountFromDalAsync
+        ")]
+        public async Task<IResult> AddAsync(AddProductDto addProductDto)
         {
             Random rnd = new Random();
             Product product = _mapper.Map<Product>(addProductDto);
-            bool result = false;
+            int id = 0;
             //for (int i = 0; i <= 999; i++)
             {
                 //product.Id = 0;
@@ -109,49 +131,101 @@ namespace Business.Concrete
                 //{
                 //    return bussinessRules;
                 //}c
-                result = _productDal.Add(product);
-                if (result)
-                    _productImageService.AddDefaultProductImageByProductId(product.Id);
+                id = await _productDal.AddAsync(product);
+                if (id > 0)
+                    await _productImageService.AddDefaultProductImageByProductIdAsync(id);
             }
-            return result ? new SuccessResult("eklendi") : new ErrorResult("eklenemedi hata oluştu");
+            return id > 0 ? new SuccessResult("eklendi") : new ErrorResult("eklenemedi hata oluştu");
         }
-        public IResult AddRange(List<Product> products)
+        [CacheRemoveAspect(@"
+        Business.Abstract.IProductService.GetAsync,
+        Business.Abstract.IProductService.GetAllAsync,
+        Business.Abstract.IProductService.GetMostExpensiveProductAsync,
+        Business.Abstract.IProductService.GetListDynamicAsync,
+        Business.Abstract.IProductService.GetProductDetailDtoAsync,
+        Business.Abstract.IProductService.GetProductDetailDtoByCategoryIdAsync,
+        Business.Abstract.IProductService.GetRelatedProductsByProductIdAsync,
+        Business.Abstract.IProductService.GetRelatedProductsByCategoryNameAsync,
+        Business.Abstract.IProductService.GetPopularProductsAsync,
+        Business.Abstract.IProductService.GetProductDetailByIdAsync,
+        Business.Abstract.IProductService.GetProductsCountFromDalAsync
+        ")]
+        public async Task<IResult> AddRangeAsync(List<Product> products)
         {
-            bool result = _productDal.AddRange(products);
+            bool result = await _productDal.AddRangeAsync(products);
             return result ? new SuccessResult("eklendi") : new ErrorResult("eklenemedi hata oluştu");
         }
-        public IResult Delete(int id)
+        [CacheRemoveAspect(@"
+        Business.Abstract.IProductService.GetAsync,
+        Business.Abstract.IProductService.GetAllAsync,
+        Business.Abstract.IProductService.GetMostExpensiveProductAsync,
+        Business.Abstract.IProductService.GetListDynamicAsync,
+        Business.Abstract.IProductService.GetProductDetailDtoAsync,
+        Business.Abstract.IProductService.GetProductDetailDtoByCategoryIdAsync,
+        Business.Abstract.IProductService.GetRelatedProductsByProductIdAsync,
+        Business.Abstract.IProductService.GetRelatedProductsByCategoryNameAsync,
+        Business.Abstract.IProductService.GetPopularProductsAsync,
+        Business.Abstract.IProductService.GetProductDetailByIdAsync,
+        Business.Abstract.IProductService.GetProductsCountFromDalAsync
+        ")]
+        public async Task<IResult> DeleteAsync(int id)
         {
             bool result = false;
-            Product product = _productDal.Get(p => p.Id == id);
+            Product product = await _productDal.GetAsync(p => p.Id == id);
             if (product != null)
             {
-                result = _productDal.Delete(product);
+                result = await _productDal.DeleteAsync(product);
             }
             return result ? new SuccessResult("Silindi") : new ErrorResult("Silinemedi hata oluştu");
         }
-        public IResult Update(Product product)
+        [CacheRemoveAspect(@"
+        Business.Abstract.IProductService.GetAsync,
+        Business.Abstract.IProductService.GetAllAsync,
+        Business.Abstract.IProductService.GetMostExpensiveProductAsync,
+        Business.Abstract.IProductService.GetListDynamicAsync,
+        Business.Abstract.IProductService.GetProductDetailDtoAsync,
+        Business.Abstract.IProductService.GetProductDetailDtoByCategoryIdAsync,
+        Business.Abstract.IProductService.GetRelatedProductsByProductIdAsync,
+        Business.Abstract.IProductService.GetRelatedProductsByCategoryNameAsync,
+        Business.Abstract.IProductService.GetPopularProductsAsync,
+        Business.Abstract.IProductService.GetProductDetailByIdAsync,
+        Business.Abstract.IProductService.GetProductsCountFromDalAsync
+        ")]
+        public async Task<IResult> UpdateAsync(Product product)
         {
             bool result = false;
-            Product getProduct = _productDal.Get(p => p.Id == product.Id);
-            if (getProduct != null)
+            bool isExists = await _productDal.IsExistAsync(p => p.Id == product.Id);
+            if (isExists)
             {
-                result = _productDal.Update(product);
+                result = await _productDal.UpdateAsync(product);
             }
             return result ? new SuccessResult("Güncellendi") : new ErrorResult("Güncellenemedi hata oluştu");
         }
-        public IResult AddWithImage(AddProductWithImageDto addProductWithImageDto)
+        [CacheRemoveAspect(@"
+        Business.Abstract.IProductService.GetAsync,
+        Business.Abstract.IProductService.GetAllAsync,
+        Business.Abstract.IProductService.GetMostExpensiveProductAsync,
+        Business.Abstract.IProductService.GetListDynamicAsync,
+        Business.Abstract.IProductService.GetProductDetailDtoAsync,
+        Business.Abstract.IProductService.GetProductDetailDtoByCategoryIdAsync,
+        Business.Abstract.IProductService.GetRelatedProductsByProductIdAsync,
+        Business.Abstract.IProductService.GetRelatedProductsByCategoryNameAsync,
+        Business.Abstract.IProductService.GetPopularProductsAsync,
+        Business.Abstract.IProductService.GetProductDetailByIdAsync,
+        Business.Abstract.IProductService.GetProductsCountFromDalAsync
+        ")]
+        public async Task<IResult> AddWithImageAsync(AddProductWithImageDto addProductWithImageDto)
         {
             Product product = _mapper.Map<Product>(addProductWithImageDto);
-            bool result = _productDal.Add(product);
-            if (result)
+            int id = await _productDal.AddAsync(product);
+            if (id > 0)
             {
                 for (int i = 0; i < addProductWithImageDto.IFormFiles.Count(); i++)
                 {
                     (string, bool) imageResult = _productImageUploadService.AddImage(addProductWithImageDto.IFormFiles[i]);
                     if (imageResult.Item2)
                     {
-                        IResult uploadingResult = _productImageService.Add(new ProductImage { ImageUrl = imageResult.Item1, Name = product.Name, ProductId = product.Id }); ;
+                        IResult uploadingResult = await _productImageService.AddAsync(new ProductImage { ImageUrl = imageResult.Item1, Name = product.Name, ProductId = product.Id }); ;
                         //if (!uploadingResult.Success)
                         //{
                         //    return new ErrorResult(Messages.Error);
@@ -167,14 +241,10 @@ namespace Business.Concrete
         }
         #endregion
         #region Rules
-        public int GetProductsCountFromDal()
+        [CacheAspect(60)]
+        public async Task<int> GetProductsCountFromDalAsync()
         {
-            int totalCount = _productDal.GetProductsCountFromDal();//46 ms avg.
-            return totalCount;
-        }
-        public int GetProductsCountFromBussines()
-        {
-            int totalCount = _productDal.GetAll().Count();//1.234 ms avg.
+            int totalCount = await _productDal.GetProductsCountFromDalAsync();//46 ms avg.
             return totalCount;
         }
         #endregion

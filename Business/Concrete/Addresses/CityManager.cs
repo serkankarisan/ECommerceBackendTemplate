@@ -1,9 +1,11 @@
 ﻿using Business.Abstract.Addresses;
 using Business.Constants;
+using Core.Aspects.Autofac.Caching;
 using Core.Utilities.Paging;
 using Core.Utilities.Results;
 using DataAccess.Abstract.AddressAbstract;
 using Entities.Concrete.AddressConcrete;
+using System.Linq.Expressions;
 
 namespace Business.Concrete.Addresses
 {
@@ -15,40 +17,54 @@ namespace Business.Concrete.Addresses
             _cityDal = cityDal;
         }
         #region Queries
+        [CacheAspect(60)]
         public async Task<IDataResult<IPaginate<City>>> GetAllAsync(int index, int size)
         {
             IPaginate<City>? result = await _cityDal.GetListAsync(index: index, size: size);
             return result != null ? new SuccessDataResult<IPaginate<City>>(result, Messages.Listed) : new ErrorDataResult<IPaginate<City>>(result, Messages.NotListed);
         }
-        public async Task<IDataResult<City>> GetByIdAsync(int id)
+        [CacheAspect(60)]
+        public async Task<IDataResult<City>> GetAsync(Expression<Func<City, bool>> filter)
         {
-            City? result = await _cityDal.GetAsync(p => p.Id == id);
+            City? result = await _cityDal.GetAsync(filter);
             return result != null ? new SuccessDataResult<City>(result, Messages.Listed) : new ErrorDataResult<City>(result, Messages.NotListed);
         }
         #endregion
         #region Commands
+        [CacheRemoveAspect(@"
+        Business.Abstract.ICityService.GetAllAsync,
+        Business.Abstract.ICityService.GetAsync
+        ")]
         public async Task<IResult> UpdateAsync(City city)
         {
-            City? updatedAddress = await _cityDal.GetAsync(p => p.Id == city.Id);
-            if (updatedAddress == null)
+            bool isExists = await _cityDal.IsExistAsync(p => p.Id == city.Id);
+            if (!isExists)
                 return new ErrorResult(Messages.NotFound);
 
-            City result = await _cityDal.UpdateAsync(updatedAddress);
-            return result != null ? new SuccessResult(Messages.Updated) : new ErrorResult(Messages.NotUpdated);
+            bool result = await _cityDal.UpdateAsync(city);
+            return result ? new SuccessResult(Messages.Updated) : new ErrorResult(Messages.NotUpdated);
         }
+        [CacheRemoveAspect(@"
+        Business.Abstract.ICityService.GetAllAsync,
+        Business.Abstract.ICityService.GetAsync
+        ")]
         public async Task<IResult> AddAsync(City city)
         {
-            City result = await _cityDal.AddAsync(city);
-            return result != null ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
+            int result = await _cityDal.AddAsync(city);
+            return result > 0 ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
         }
+        [CacheRemoveAspect(@"
+        Business.Abstract.ICityService.GetAllAsync,
+        Business.Abstract.ICityService.GetAsync
+        ")]
         public async Task<IResult> DeleteAsync(int id)
         {
             City? deletedCity = await _cityDal.GetAsync(p => p.Id == id);
             if (deletedCity == null)
                 return new ErrorResult(Messages.NotFound);
 
-            City result = await _cityDal.DeleteAsync(deletedCity);
-            return result != null ? new SuccessResult(Messages.Deleted) : new ErrorResult(Messages.NotDeleted);
+            bool result = await _cityDal.DeleteAsync(deletedCity);
+            return result ? new SuccessResult(Messages.Deleted) : new ErrorResult(Messages.NotDeleted);
         }
         #endregion
     }

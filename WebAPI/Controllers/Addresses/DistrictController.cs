@@ -23,7 +23,7 @@ namespace WebAPI.Controllers.Addresses
         [HttpGet("get-by-id")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            Core.Utilities.Results.IDataResult<District> result = await _districtService.GetByIdAsync(id);
+            Core.Utilities.Results.IDataResult<District> result = await _districtService.GetAsync(q => q.Id == id);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpGet("get-by-county-id")]
@@ -53,18 +53,5 @@ namespace WebAPI.Controllers.Addresses
             return result.Success ? Ok(result) : BadRequest();
         }
         #endregion
-
-        [HttpGet("getall-from-bussines")]
-        public IActionResult GetAllFromBussines()
-        {
-            return Ok(_districtService.GetAllFromBussiness());
-        }
-        [HttpGet("getall-from-dal")]
-        public IActionResult GetAllFromDal()
-        {
-            return Ok(_districtService.GetAllFromDal());
-
-        }
-
     }
 }

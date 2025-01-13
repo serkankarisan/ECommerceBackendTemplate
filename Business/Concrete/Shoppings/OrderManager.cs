@@ -1,10 +1,11 @@
 ﻿using Business.Abstract.Shoppings;
 using Business.Constants;
+using Core.Aspects.Autofac.Caching;
 using Core.Utilities.Paging;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Concrete.Shoppings;
-using Entities.DTOs.Shoppings;
+using System.Linq.Expressions;
 
 namespace Business.Concrete.Shoppings
 {
@@ -16,47 +17,56 @@ namespace Business.Concrete.Shoppings
             _orderDal = orderDal;
         }
         #region Queries
+        [CacheAspect(60)]
         public async Task<IDataResult<IPaginate<Order>>> GetAllAsync(int index, int size)
         {
             IPaginate<Order>? result = await _orderDal.GetListAsync(index: index, size: size);
             return result != null ? new SuccessDataResult<IPaginate<Order>>(result, Messages.Listed) : new ErrorDataResult<IPaginate<Order>>(result, Messages.NotListed);
         }
-        public async Task<IDataResult<Order>> GetByIdAsync(int id)
+        [CacheAspect(60)]
+        public async Task<IDataResult<Order>> GetAsync(Expression<Func<Order, bool>> filter)
         {
-            Order? result = await _orderDal.GetAsync(p => p.Id == id);
+            Order? result = await _orderDal.GetAsync(filter);
             return result != null ? new SuccessDataResult<Order>(result, Messages.Listed) : new ErrorDataResult<Order>(result, Messages.NotListed);
         }
         #endregion
         #region Commands
+        [CacheRemoveAspect(@"
+        Business.Abstract.IOrderService.GetAllAsync,
+        Business.Abstract.IOrderService.GetAsync
+        ")]
         public async Task<IResult> UpdateAsync(Order order)
         {
-            Task<IDataResult<Order>> updatedOrder = GetByIdAsync(order.Id);
-            if (updatedOrder == null)
+            bool isExists = await _orderDal.IsExistAsync(q => q.Id == order.Id);
+            if (!isExists)
             {
                 return new ErrorResult(Messages.NotFound);
             }
-            Order result = await _orderDal.UpdateAsync(order);
-            return result != null ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
+            bool result = await _orderDal.UpdateAsync(order);
+            return result ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
         }
+        [CacheRemoveAspect(@"
+        Business.Abstract.IOrderService.GetAllAsync,
+        Business.Abstract.IOrderService.GetAsync
+        ")]
         public async Task<IResult> AddAsync(Order order)
         {
-            Order result = await _orderDal.AddAsync(order);
-            return result != null ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
+            int result = await _orderDal.AddAsync(order);
+            return result > 0 ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
         }
+        [CacheRemoveAspect(@"
+        Business.Abstract.IOrderService.GetAllAsync,
+        Business.Abstract.IOrderService.GetAsync
+        ")]
         public async Task<IResult> DeleteAsync(int id)
         {
-            IDataResult<Order> deletedOrder = await GetByIdAsync(id);
+            Order deletedOrder = await _orderDal.GetAsync(q => q.Id == id);
             if (deletedOrder == null)
             {
                 return new ErrorResult(Messages.NotFound);
             }
-            Order result = await _orderDal.DeleteAsync(deletedOrder.Data);
-            return result != null ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
-        }
-
-        public Task<IResult> AddAsync(AddOrderDto addOrderDto)
-        {
-            throw new NotImplementedException();
+            bool result = await _orderDal.DeleteAsync(deletedOrder);
+            return result ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
         }
         #endregion
     }

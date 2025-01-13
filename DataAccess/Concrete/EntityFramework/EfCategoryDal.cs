@@ -8,31 +8,31 @@ namespace DataAccess.Concrete.EntityFramework
 {
     public class EfCategoryDal : EfEntityRepositoryBase<Category, ECommerceContext>, ICategoryDal
     {
-        public bool CategoryIsExist(string name)
+        public async Task<bool> CategoryIsExistAsync(string name)
         {
             using (ECommerceContext context = new ECommerceContext())
             {
-                return context.Categories.Any(p => p.Name == name);
+                return await context.Categories.AnyAsync(p => p.Name == name);
             }
         }
         #region Queries
-        public List<Category> GetAllParentCategory()
+        public async Task<List<Category>> GetAllParentCategoryAsync()
         {
             using (ECommerceContext context = new ECommerceContext())
             {
                 IQueryable<Category> queryable = context.Set<Category>().AsQueryable();
-                return queryable.Where(p => p.SubCategories.Count() > 0).ToList();
+                return await queryable.Where(p => p.SubCategories.Count() > 0).ToListAsync();
             }
         }
-        public int GetAllParentCategoryCount()
+        public async Task<int> GetAllParentCategoryCountAsync()
         {
             using (ECommerceContext context = new ECommerceContext())
             {
                 IQueryable<Category> queryable = context.Set<Category>().AsQueryable();
-                return queryable.Count(p => p.SubCategories.Count() > 0);
+                return await queryable.CountAsync(p => p.SubCategories.Count() > 0);
             }
         }
-        public async Task<List<Category>> GetChildCategoriesByCategoryId(int categoryId)
+        public async Task<List<Category>> GetChildCategoriesByCategoryIdAsync(int categoryId)
         {
             using (ECommerceContext context = new ECommerceContext())
             {
@@ -40,7 +40,7 @@ namespace DataAccess.Concrete.EntityFramework
                 bool categoryExists = await queryable.AnyAsync(p => p.Id == categoryId);
                 if (categoryExists)
                 {
-                    return queryable.Where(q => q.ParentCategoryId == categoryId).ToList();
+                    return await queryable.Where(q => q.ParentCategoryId == categoryId).ToListAsync();
                 }
                 return new List<Category>();
             }

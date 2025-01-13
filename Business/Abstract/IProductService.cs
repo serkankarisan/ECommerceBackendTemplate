@@ -3,30 +3,30 @@ using Core.Utilities.Paging;
 using Core.Utilities.Results;
 using Entities.Concrete;
 using Entities.DTOs.Products;
+using System.Linq.Expressions;
 
 namespace Business.Abstract
 {
     public interface IProductService
     {
         #region Queries
-        IDataResult<Product> Get(int id);
+        Task<IDataResult<Product>> GetAsync(Expression<Func<Product, bool>> filter);
         Task<IDataResult<IPaginate<Product>>> GetAllAsync(int index, int size);
-        IDataResult<Product> GetMostExpensiveProduct();
-        IResult AddWithImage(AddProductWithImageDto addProductWithImageDto);
-        IDataResult<IPaginate<Product>> GetListDynamic(int index, int size, Dynamic dynamic);
+        Task<IDataResult<Product>> GetMostExpensiveProductAsync();
+        Task<IResult> AddWithImageAsync(AddProductWithImageDto addProductWithImageDto);
+        Task<IDataResult<IPaginate<Product>>> GetListDynamicAsync(int index, int size, Dynamic dynamic);
         Task<IDataResult<IPaginate<ProductDetailDto>>> GetProductDetailDtoAsync(int index, int size);
-        int GetProductsCountFromDal();
-        int GetProductsCountFromBussines();
-        Task<IDataResult<IPaginate<ProductDetailDto>>> GetRelatedProductsByProductId(int productId, int index = 0, int size = 20);
-        Task<IDataResult<IPaginate<ProductDetailDto>>> GetRelatedProductsByCategoryId(string categoryName, int index = 0, int size = 20);
-        Task<List<ProductDetailDto>> GetPopularProducts(int index = 0, int size = 20);
+        Task<int> GetProductsCountFromDalAsync();
+        Task<IDataResult<IPaginate<ProductDetailDto>>> GetRelatedProductsByProductIdAsync(int productId, int index = 0, int size = 20);
+        Task<IDataResult<IPaginate<ProductDetailDto>>> GetRelatedProductsByCategoryNameAsync(string categoryName, int index = 0, int size = 20);
+        Task<List<ProductDetailDto>> GetPopularProductsAsync(int index = 0, int size = 20);
         Task<IDataResult<ProductDetailDto>> GetProductDetailByIdAsync(int id);
         #endregion
         #region Commands
-        IResult Add(AddProductDto addProductDto);
-        IResult AddRange(List<Product> products);
-        IResult Update(Product product);
-        IResult Delete(int id);
+        Task<IResult> AddAsync(AddProductDto addProductDto);
+        Task<IResult> AddRangeAsync(List<Product> products);
+        Task<IResult> UpdateAsync(Product product);
+        Task<IResult> DeleteAsync(int id);
         #endregion     
     }
 }

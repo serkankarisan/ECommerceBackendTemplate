@@ -26,7 +26,7 @@ namespace Business.Concrete.Auths
             _mailService = mailService;
             _basketDal = basketDal;
         }
-        public IDataResult<User> Register(UserForRegisterDto userForRegisterDto, string password)
+        public async Task<IDataResult<User>> RegisterAsync(UserForRegisterDto userForRegisterDto, string password)
         {
             byte[] passwordHash, passwordSalt;
             HashingHelper.CreatePasswordHash(password, out passwordHash, out passwordSalt);
@@ -39,16 +39,16 @@ namespace Business.Concrete.Auths
                 PasswordSalt = passwordSalt,
                 Status = true
             };
-            IResult result = _userService.Add(user);
+            IResult result = await _userService.AddAsync(user);
             if (result.Success)
             {
-                _basketDal.Add(new Basket { UserId = user.Id });
+                await _basketDal.AddAsync(new Basket { UserId = user.Id });
             }
-            return new SuccessDataResult<User>(user, Messages.UserRegistered);
+            return result.Success ? new SuccessDataResult<User>(user, Messages.UserRegistered) : new ErrorDataResult<User>(user, Messages.UserNotRegistered);
         }
-        public IDataResult<User> Login(UserForLoginDto userForLoginDto)
+        public async Task<IDataResult<User>> LoginAsync(UserForLoginDto userForLoginDto)
         {
-            User userToCheck = _userService.GetByMail(userForLoginDto.Email);
+            User userToCheck = await _userService.GetByMailAsync(userForLoginDto.Email);
             if (userToCheck == null)
             {
                 return new ErrorDataResult<User>(Messages.UserNotFound);
@@ -61,9 +61,13 @@ namespace Business.Concrete.Auths
 
             return new SuccessDataResult<User>(userToCheck, true, Messages.SuccessfulLogin);
         }
-        public IDataResult<UserForUpdateDto> Update(UserForUpdateDto userForUpdate)
+        public async Task<IDataResult<UserForUpdateDto>> UpdateAsync(UserForUpdateDto userForUpdate)
         {
-            IDataResult<User> currentCustomer = _userService.GetById(userForUpdate.UserId);
+            bool isExists = await _userService.IsExistAsync(q => q.Id == userForUpdate.UserId);
+            if (!isExists)
+            {
+                return new ErrorDataResult<UserForUpdateDto>(userForUpdate, "Kullanıcı Güncellenemedi!");
+            }
 
             User user = new User
             {
@@ -71,31 +75,22 @@ namespace Business.Concrete.Auths
                 Email = userForUpdate.Email,
                 FirstName = userForUpdate.FirstName,
                 LastName = userForUpdate.LastName,
-
             };
 
-            _userService.Update(user);
+            IResult result = await _userService.UpdateAsync(user);
 
-            return new SuccessDataResult<UserForUpdateDto>(userForUpdate, "Müşteri Güncellendi.");
+            return result.Success ? new SuccessDataResult<UserForUpdateDto>(userForUpdate, "Kullanıcı Güncellendi.") : new ErrorDataResult<UserForUpdateDto>(userForUpdate, "Kullanıcı Güncellenemedi!");
         }
-        public IResult UserExists(string email)
+        public async Task<IDataResult<AccessToken>> CreateAccessTokenAsync(User user)
         {
-            if (_userService.GetByMail(email) != null)
-            {
-                return new ErrorResult(Messages.UserAlreadyExists);
-            }
-            return new SuccessResult();
-        }
-        public IDataResult<AccessToken> CreateAccessToken(User user)
-        {
-            List<OperationClaim> claims = _userService.GetClaims(user);
+            List<OperationClaim> claims = await _userService.GetClaimsAsync(user);
             AccessToken accessToken = _tokenHelper.CreateToken(user, claims);
             return new SuccessDataResult<AccessToken>(accessToken, Messages.AccessTokenCreated);
         }
-        public IResult ChangePassword(ChangePasswordDto changePasswordDto)
+        public async Task<IResult> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
         {
             byte[] passwordHash, passwordSalt;
-            User userToCheck = _userService.GetById(changePasswordDto.UserId).Data;
+            User userToCheck = (await _userService.GetAsync(q => q.Id == changePasswordDto.UserId)).Data;
             if (userToCheck == null)
             {
                 return new ErrorResult(Messages.UserNotFound);
@@ -107,17 +102,17 @@ namespace Business.Concrete.Auths
             HashingHelper.CreatePasswordHash(changePasswordDto.NewPassword, out passwordHash, out passwordSalt);
             userToCheck.PasswordHash = passwordHash;
             userToCheck.PasswordSalt = passwordSalt;
-            _userService.Update(userToCheck);
-            return new SuccessResult("Parola Değişti.");
+            IResult result = await _userService.UpdateAsync(userToCheck);
+            return result.Success ? new SuccessResult("Parola Değişti.") : new ErrorResult("Parola Değiştirilemedi!");
         }
-        public IResult PasswordReset(PasswordResetDto passwordResetDto)
+        public async Task<IResult> PasswordResetAsync(PasswordResetDto passwordResetDto)
         {
-            _resetPasswordCodeService.ConfirmResetCode(passwordResetDto.Code);
-            IDataResult<ResetPasswordCode> resetPassword = _resetPasswordCodeService.GetByCode(passwordResetDto.Code);
+            await _resetPasswordCodeService.ConfirmResetCodeAsync(passwordResetDto.Code);
+            IDataResult<ResetPasswordCode> resetPassword = await _resetPasswordCodeService.GetByCodeAsync(passwordResetDto.Code);
             resetPassword.Data.IsActive = false;
 
             byte[] passwordHash, passwordSalt;
-            User userToCheck = _userService.GetById(passwordResetDto.UserId).Data;
+            User userToCheck = (await _userService.GetAsync(q => q.Id == passwordResetDto.UserId)).Data;
             if (userToCheck == null)
             {
                 return new ErrorResult(Messages.UserNotFound);
@@ -126,15 +121,15 @@ namespace Business.Concrete.Auths
             HashingHelper.CreatePasswordHash(passwordResetDto.NewPassword, out passwordHash, out passwordSalt);
             userToCheck.PasswordHash = passwordHash;
             userToCheck.PasswordSalt = passwordSalt;
-            _userService.Update(userToCheck);
-            _resetPasswordCodeService.Update(resetPassword.Data);
-            return new SuccessResult("Parola Değişti.");
+            IResult result = await _userService.UpdateAsync(userToCheck);
+            await _resetPasswordCodeService.UpdateAsync(resetPassword.Data);
+            return result.Success ? new SuccessResult("Parola Değişti.") : new ErrorResult("Parola Değiştirilemedi!");
         }
-        public IResult SendResetCodeMail(string email)
+        public async Task<IResult> SendResetCodeMailAsync(string email)
         {
             string code = Guid.NewGuid().ToString();
 
-            User user = _userService.GetUserByEmail(email).Data;
+            User user = (await _userService.GetUserByEmailAsync(email)).Data;
 
             if (user == null) { return new ErrorResult("Kullanıcı Bulunamadı!"); }
 
@@ -147,12 +142,17 @@ namespace Business.Concrete.Auths
                 EndDate = DateTime.Now.AddHours(3),
                 UserId = user.Id
             };
-            if (_resetPasswordCodeService.Add(resetPasswordCode).Success)
+            if ((await _resetPasswordCodeService.AddAsync(resetPasswordCode)).Success)
             {
-                IResult result = _mailService.SendPasswordResetMailAsync(resetPasswordCode);
+                IResult result = await _mailService.SendPasswordResetMailAsync(resetPasswordCode);
                 if (result.Success) { return new SuccessResult("Mail Gönderilmiştir."); }
             };
             return new ErrorResult("Bir hata oluştu");
+        }
+        public async Task<IResult> IsExistAsync(string email)
+        {
+            bool result = await _userService.IsExistAsync(q => q.Email == email);
+            return result ? new SuccessResult("Kullanıcı Bulundu.") : new ErrorResult("Kullanıcı Bulunamadı!");
         }
     }
 }

@@ -24,7 +24,7 @@ namespace WebAPI.Controllers.Shopping
         [HttpGet("get-by-id")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            Core.Utilities.Results.IDataResult<Basket> result = await _basketService.GetByIdAsync(id);
+            Core.Utilities.Results.IDataResult<Basket> result = await _basketService.GetAsync(q => q.Id == id);
             return result.Success ? Ok(result) : BadRequest();
         }
         #endregion

@@ -8,11 +8,11 @@ namespace DataAccess.Abstract
     public interface IProductDal : IEntityRepository<Product>
     {
         #region Queries
-        Product GetMostExpensiveProduct();
+        Task<Product> GetMostExpensiveProductAsync();
         Task<IPaginate<ProductDetailDto>> GetProductDetailDtoAsync(int index, int size);
         Task<IPaginate<ProductDetailDto>> GetProductDetailDtoByCategoryIdAsync(int categoryId, int index, int size);
-        int GetProductsCountFromDal();
-        Task<List<ProductDetailDto>> GetPopularProducts(int index = 0, int size = 20);
+        Task<int> GetProductsCountFromDalAsync();
+        Task<List<ProductDetailDto>> GetPopularProductsAsync(int index = 0, int size = 20);
         Task<ProductDetailDto> GetProductDetailByIdAsync(int id);
         #endregion
         #region Commands

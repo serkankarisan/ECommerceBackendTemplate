@@ -1,6 +1,5 @@
 ﻿using Business.Abstract.Shoppings;
 using Entities.Concrete.Shoppings;
-using Entities.DTOs.Shoppings;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers.Shopping
@@ -24,13 +23,13 @@ namespace WebAPI.Controllers.Shopping
         [HttpGet("get-by-id")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            Core.Utilities.Results.IDataResult<Order> result = await _orderService.GetByIdAsync(id);
+            Core.Utilities.Results.IDataResult<Order> result = await _orderService.GetAsync(q => q.Id == id);
             return result.Success ? Ok(result) : BadRequest();
         }
         #endregion
         #region Commands
         [HttpPost("add")]
-        public async Task<IActionResult> AddAsync(AddOrderDto order)
+        public async Task<IActionResult> AddAsync(Order order)
         {
             Core.Utilities.Results.IResult result = await _orderService.AddAsync(order);
             return result.Success ? Ok(result) : BadRequest();

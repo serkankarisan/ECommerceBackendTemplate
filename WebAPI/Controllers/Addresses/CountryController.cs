@@ -23,7 +23,7 @@ namespace WebAPI.Controllers.Addresses
         [HttpGet("get-by-id")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            Core.Utilities.Results.IDataResult<Country> result = await _countryService.GetByIdAsync(id);
+            Core.Utilities.Results.IDataResult<Country> result = await _countryService.GetAsync(q => q.Id == id);
             return result.Success ? Ok(result) : BadRequest();
         }
         #endregion

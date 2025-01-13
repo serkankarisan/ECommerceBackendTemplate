@@ -3,7 +3,7 @@ using Entities.Concrete.AddressConcrete;
 
 namespace DataAccess.Abstract.AddressAbstract
 {
-    public interface ICountryDal : IEntityRepository<Country>
+    public interface ICountyDal : IEntityRepository<County>
     {
 
     }

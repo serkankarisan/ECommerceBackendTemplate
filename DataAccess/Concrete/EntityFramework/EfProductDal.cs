@@ -4,6 +4,7 @@ using DataAccess.Abstract;
 using DataAccess.Concrete.EntityFramework.Contexts;
 using Entities.Concrete;
 using Entities.DTOs.Products;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace DataAccess.Concrete.EntityFramework
@@ -11,11 +12,11 @@ namespace DataAccess.Concrete.EntityFramework
     public class EfProductDal : EfEntityRepositoryBase<Product, ECommerceContext>, IProductDal
     {
         #region Queries
-        public Product GetMostExpensiveProduct()
+        public async Task<Product> GetMostExpensiveProductAsync()
         {
             using (ECommerceContext context = new ECommerceContext())
             {
-                return context.Products.OrderByDescending(m => m.Price).FirstOrDefault();
+                return await context.Products.OrderByDescending(m => m.Price).FirstOrDefaultAsync();
             }
         }
         public async Task<IPaginate<ProductDetailDto>> GetProductDetailDtoAsync(int index, int size)
@@ -61,20 +62,20 @@ namespace DataAccess.Concrete.EntityFramework
         public async Task<ProductDetailDto> GetProductDetailByIdAsync(int id)
         {
             IPaginate<ProductDetailDto> result = await genericProductDetailDtoAsync(filter: p => p.Id == id, doPaginate: false);
-            return result.Items.Count != 0 ? result.Items.First() : null;
+            return result.Items.Count != 0 ? result.Items.FirstOrDefault() : null;
         }
-        public int GetProductsCountFromDal()
+        public async Task<int> GetProductsCountFromDalAsync()
         {
             using (ECommerceContext context = new ECommerceContext())
             {
-                return context.Products.Count();
+                return await context.Products.CountAsync();
             }
         }
-        public async Task<List<ProductDetailDto>> GetPopularProducts(int index = 0, int size = 20)
+        public async Task<List<ProductDetailDto>> GetPopularProductsAsync(int index = 0, int size = 20)
         {
             using (ECommerceContext context = new ECommerceContext())
             {
-                var result = (
+                var result = await (
                      from bi in context.BasketItems
                      join p in context.Products on bi.ProductId equals p.Id
                      group bi by new { p.Id, p.Name } into g
@@ -84,7 +85,7 @@ namespace DataAccess.Concrete.EntityFramework
                          Id = g.Key.Id,
                          TotalSales = g.Sum(bi => bi.Quantity)
                      }
-                    ).Take(20).ToList();
+                    ).Take(20).ToListAsync();
 
                 IEnumerable<ProductDetailDto> popularProducts = (
                     from r in result

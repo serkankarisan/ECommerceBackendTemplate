@@ -5,7 +5,7 @@ using Entities.Concrete.AddressConcrete;
 
 namespace DataAccess.Concrete.EntityFramework.AddressEfConcrete
 {
-    public class EfAddressDal : EfEntityRepositoryBase<Address, ECommerceContext>, IAddressDal
+    public class EfDistrictDal : EfEntityRepositoryBase<District, ECommerceContext>, IDistrictDal
     {
     }
 }

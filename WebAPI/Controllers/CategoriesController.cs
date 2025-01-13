@@ -1,7 +1,10 @@
 ﻿using Business.Abstract;
+using Core.Utilities.Results;
 using Entities.Concrete;
 using Entities.DTOs.Categories;
+using Entities.DTOs.Categories.TrendyolDtos;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Text.Json;
 
 namespace WebAPI.Controllers
@@ -23,13 +26,13 @@ namespace WebAPI.Controllers
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpGet("get-child-categories-by-category-id")]
-        public async Task<IActionResult> GetChildCategoriesByCategoryId(int categoryId)
+        public async Task<IActionResult> GetChildCategoriesByCategoryIdAsync(int categoryId)
         {
-            Core.Utilities.Results.IDataResult<List<CategoryDto>> result = await _categoryService.GetChildCategoriesByCategoryId(categoryId);
+            Core.Utilities.Results.IDataResult<List<CategoryDto>> result = await _categoryService.GetChildCategoriesByCategoryIdAsync(categoryId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpGet("get-by-id")]
-        public async Task<IActionResult> GetById(int categoryId)
+        public async Task<IActionResult> GetByIdAsync(int categoryId)
         {
             Core.Utilities.Results.IDataResult<CategoryDto> result = await _categoryService.GetAsync(q => q.Id == categoryId);
             return result.Success ? Ok(result) : BadRequest(result);
@@ -37,25 +40,25 @@ namespace WebAPI.Controllers
         #endregion
         #region Commands
         [HttpPost("add")]
-        public IActionResult Add(AddCategoryDto addCategoryDto)
+        public async Task<IActionResult> AddAsync(AddCategoryDto addCategoryDto)
         {
-            Core.Utilities.Results.IDataResult<CategoryDto> result = _categoryService.AddWithDto(addCategoryDto);
+            Core.Utilities.Results.IDataResult<CategoryDto> result = await _categoryService.AddWithDtoAsync(addCategoryDto);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpPost("update")]
-        public IActionResult Update(Category category)
+        public async Task<IActionResult> UpdateAsync(Category category)
         {
-            Core.Utilities.Results.IResult result = _categoryService.Update(category);
+            Core.Utilities.Results.IResult result = await _categoryService.UpdateAsync(category);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpPost("delete")]
-        public IActionResult Delete(int categoryId)
+        public async Task<IActionResult> DeleteAsync(int categoryId)
         {
-            Core.Utilities.Results.IResult result = _categoryService.Delete(categoryId);
+            Core.Utilities.Results.IResult result = await _categoryService.DeleteAsync(categoryId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpPost("add-categories-api")]
-        public async Task<IActionResult> AddCategoriesApi()
+        public async Task<IActionResult> AddCategoriesApiAsync()
         {
             //sadece ihtiyac duyulduğunda çalıştırılması gerek
             //return null;
@@ -65,25 +68,19 @@ namespace WebAPI.Controllers
 
             if (response.IsSuccessStatusCode)
             {
-                string responseContent = await response.Content.ReadAsStringAsync();
-
-                dynamic apiRoot = JsonSerializer.Deserialize<dynamic>(responseContent);
-                List<dynamic> apiCategories = apiRoot.categories;
                 try
                 {
-                    foreach (dynamic category in apiCategories)
-                    {
-                        Core.Utilities.Results.IDataResult<CategoryDto> parentResult = _categoryService.AddWithDto(new AddCategoryDto { Name = category.name, ParentCategoryId = null });
-                        if (parentResult != null)
-                        {
+                    string responseContent = await response.Content.ReadAsStringAsync();
 
-                        }
+                    TrendyolCategoryResponseDto apiRoot = JsonConvert.DeserializeObject<TrendyolCategoryResponseDto>(responseContent);
+                    IEnumerable<TrendyolCategoryDto> apiCategories = apiRoot.Categories;
+                    foreach (TrendyolCategoryDto category in apiCategories)
+                    {
+                        await _categoryService.AddCategoryAsync(category);
                     }
                 }
                 catch (Exception)
                 {
-
-                    throw;
                 }
             }
             else { }

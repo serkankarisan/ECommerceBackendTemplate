@@ -3,6 +3,7 @@ using Business.Constants;
 using Core.Entities.Concrete.Auth;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
+using System.Linq.Expressions;
 
 namespace Business.Concrete.Auths
 {
@@ -14,47 +15,51 @@ namespace Business.Concrete.Auths
         {
             _userDal = userDal;
         }
-        public IResult Add(User user)
+        public async Task<IResult> AddAsync(User user)
         {
-            _userDal.Add(user);
-            return new SuccessResult(Messages.Added);
+            int result = await _userDal.AddAsync(user);
+            return result > 0 ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
         }
-
-        public IResult Update(User user)
+        public async Task<IResult> UpdateAsync(User user)
         {
-            _userDal.Update(user);
-            return new SuccessResult(Messages.Updated);
+            bool result = await _userDal.UpdateAsync(user);
+            return result ? new SuccessResult(Messages.Updated) : new ErrorResult(Messages.NotUpdated);
         }
-        public IResult Delete(User user)
+        public async Task<IResult> DeleteAsync(User user)
         {
-            _userDal.Delete(user);
-            return new SuccessResult(Messages.Deleted);
+            bool result = await _userDal.DeleteAsync(user);
+            return result ? new SuccessResult(Messages.Deleted) : new ErrorResult(Messages.NotDeleted);
         }
-        public IResult UpdateInfos(User user)
+        public async Task<IResult> UpdateInfosAsync(User user)
         {
-            User userToUpdate = GetById(user.Id).Data;
+            User userToUpdate = await _userDal.GetAsync(q => q.Id == user.Id);
             userToUpdate.FirstName = user.FirstName;
             userToUpdate.LastName = user.LastName;
             userToUpdate.Email = user.Email;
-            Update(userToUpdate);
-            return new SuccessResult();
+            bool result = await _userDal.UpdateAsync(userToUpdate);
+            return result ? new SuccessResult(Messages.Updated) : new ErrorResult(Messages.NotUpdated);
         }
-        public List<OperationClaim> GetClaims(User user)
+        public async Task<List<OperationClaim>> GetClaimsAsync(User user)
         {
-            return _userDal.GetClaims(user);
+            return await _userDal.GetClaimsAsync(user);
         }
-        public User GetByMail(string email)
+        public async Task<User> GetByMailAsync(string email)
         {
-            return _userDal.Get(u => u.Email == email);
+            return await _userDal.GetAsync(u => u.Email == email);
         }
-        public IDataResult<User> GetUserByEmail(string email)
+        public async Task<IDataResult<User>> GetUserByEmailAsync(string email)
         {
-            return new SuccessDataResult<User>(_userDal.Get(u => u.Email == email), Messages.Listed);
+            User result = await _userDal.GetAsync(u => u.Email == email);
+            return result != null ? new SuccessDataResult<User>(result, Messages.Found) : new ErrorDataResult<User>(Messages.NotFound);
         }
-        public IDataResult<User> GetById(int id)
+        public async Task<IDataResult<User>> GetAsync(Expression<Func<User, bool>> filter)
         {
-            User result = _userDal.Get(p => p.Id == id);
-            return new SuccessDataResult<User>(result);
+            User result = await _userDal.GetAsync(filter);
+            return result != null ? new SuccessDataResult<User>(result, Messages.Found) : new ErrorDataResult<User>(Messages.NotFound);
+        }
+        public async Task<bool> IsExistAsync(Expression<Func<User, bool>> filter)
+        {
+            return await _userDal.IsExistAsync(filter);
         }
     }
 }

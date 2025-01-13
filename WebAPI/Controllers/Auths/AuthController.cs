@@ -17,14 +17,14 @@ namespace WebAPI.Controllers.Auths
         }
 
         [HttpPost("login")]
-        public ActionResult Login(UserForLoginDto userForLoginDto)
+        public async Task<IActionResult> LoginAsync(UserForLoginDto userForLoginDto)
         {
-            Core.Utilities.Results.IDataResult<Core.Entities.Concrete.Auth.User> userToLogin = _authService.Login(userForLoginDto);
+            Core.Utilities.Results.IDataResult<Core.Entities.Concrete.Auth.User> userToLogin = await _authService.LoginAsync(userForLoginDto);
             if (!userToLogin.Success)
             {
                 return BadRequest(userToLogin.Message);
             }
-            Core.Utilities.Results.IDataResult<Core.Utilities.Security.JWT.AccessToken> result = _authService.CreateAccessToken(userToLogin.Data);
+            Core.Utilities.Results.IDataResult<Core.Utilities.Security.JWT.AccessToken> result = await _authService.CreateAccessTokenAsync(userToLogin.Data);
             if (result.Success)
             {
                 return Ok(result);
@@ -33,15 +33,15 @@ namespace WebAPI.Controllers.Auths
         }
 
         [HttpPost("register")]
-        public ActionResult Register(UserForRegisterDto userForRegisterDto)
+        public async Task<IActionResult> RegisterAsync(UserForRegisterDto userForRegisterDto)
         {
-            Core.Utilities.Results.IResult userExists = _authService.UserExists(userForRegisterDto.Email);
+            Core.Utilities.Results.IResult userExists = await _authService.IsExistAsync(userForRegisterDto.Email);
             if (!userExists.Success)
             {
                 return BadRequest(userExists.Message);
             }
-            Core.Utilities.Results.IDataResult<Core.Entities.Concrete.Auth.User> registerResult = _authService.Register(userForRegisterDto, userForRegisterDto.Password);
-            Core.Utilities.Results.IDataResult<Core.Utilities.Security.JWT.AccessToken> result = _authService.CreateAccessToken(registerResult.Data);
+            Core.Utilities.Results.IDataResult<Core.Entities.Concrete.Auth.User> registerResult = await _authService.RegisterAsync(userForRegisterDto, userForRegisterDto.Password);
+            Core.Utilities.Results.IDataResult<Core.Utilities.Security.JWT.AccessToken> result = await _authService.CreateAccessTokenAsync(registerResult.Data);
             if (result.Success)
             {
                 return Ok(result.Data);
@@ -50,11 +50,11 @@ namespace WebAPI.Controllers.Auths
         }
 
         [HttpPut("update")]
-        public ActionResult Update(UserForUpdateDto userForUpdate)
+        public async Task<IActionResult> UpdateAsync(UserForUpdateDto userForUpdate)
         {
-            _authService.Update(userForUpdate);
-            Core.Utilities.Results.IDataResult<Core.Entities.Concrete.Auth.User> user = _userService.GetById(userForUpdate.UserId);
-            Core.Utilities.Results.IDataResult<Core.Utilities.Security.JWT.AccessToken> result = _authService.CreateAccessToken(user.Data); if (result.Success)
+            await _authService.UpdateAsync(userForUpdate);
+            Core.Utilities.Results.IDataResult<Core.Entities.Concrete.Auth.User> user = await _userService.GetAsync(q => q.Id == userForUpdate.UserId);
+            Core.Utilities.Results.IDataResult<Core.Utilities.Security.JWT.AccessToken> result = await _authService.CreateAccessTokenAsync(user.Data); if (result.Success)
             {
                 return Ok(result);
             }
@@ -62,9 +62,9 @@ namespace WebAPI.Controllers.Auths
         }
 
         [HttpPut("change-password")]
-        public IActionResult ChangePassword(ChangePasswordDto changePasswordDto)
+        public async Task<IActionResult> ChangePasswordAsync(ChangePasswordDto changePasswordDto)
         {
-            Core.Utilities.Results.IResult result = _authService.ChangePassword(changePasswordDto);
+            Core.Utilities.Results.IResult result = await _authService.ChangePasswordAsync(changePasswordDto);
             if (result.Success)
             {
                 return Ok(result);
@@ -73,9 +73,9 @@ namespace WebAPI.Controllers.Auths
         }
 
         [HttpPost("password-reset")]
-        public IActionResult PasswordReset(PasswordResetDto passwordResetDto)
+        public async Task<IActionResult> PasswordResetAsync(PasswordResetDto passwordResetDto)
         {
-            Core.Utilities.Results.IResult result = _authService.PasswordReset(passwordResetDto);
+            Core.Utilities.Results.IResult result = await _authService.PasswordResetAsync(passwordResetDto);
             if (result.Success)
             {
                 return Ok(result);

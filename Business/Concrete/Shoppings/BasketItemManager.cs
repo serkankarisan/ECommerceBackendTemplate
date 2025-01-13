@@ -1,12 +1,14 @@
 ﻿using AutoMapper;
 using Business.Abstract.Shoppings;
 using Business.Constants;
+using Core.Aspects.Autofac.Caching;
 using Core.Utilities.Paging;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Concrete.Shoppings;
 using Entities.DTOs.Shoppings;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Business.Concrete.Shoppings
 {
@@ -22,70 +24,79 @@ namespace Business.Concrete.Shoppings
             _basketDal = basketDal;
         }
         #region Queries
+        [CacheAspect(60)]
         public async Task<IDataResult<IPaginate<BasketItem>>> GetAllAsync(int index, int size)
         {
             IPaginate<BasketItem> result = await _basketItemDal.GetListAsync(index: index, size: size);
-            return new SuccessDataResult<IPaginate<BasketItem>>(result, Messages.Listed);
+            return result != null ? new SuccessDataResult<IPaginate<BasketItem>>(result, Messages.Listed) : new ErrorDataResult<IPaginate<BasketItem>>(Messages.NotListed);
         }
-        public async Task<IDataResult<BasketItem>> GetByIdAsync(int id)
+        [CacheAspect(60)]
+        public async Task<IDataResult<BasketItem>> GetAsync(Expression<Func<BasketItem, bool>> filter)
         {
-            BasketItem? result = await _basketItemDal.GetAsync(p => p.Id == id);
-            return result != null ? new SuccessDataResult<BasketItem>(result, Messages.Listed) : new ErrorDataResult<BasketItem>(result, Messages.NotListed);
+            BasketItem? result = await _basketItemDal.GetAsync(filter);
+            return result != null ? new SuccessDataResult<BasketItem>(result, Messages.Listed) : new ErrorDataResult<BasketItem>(Messages.NotListed);
         }
-        public IDataResult<List<BasketItem>> GetBasketItemsByIdUserId(int userId)
+        [CacheAspect(60)]
+        public async Task<IDataResult<List<BasketItem>>> GetBasketItemsByIdUserIdAsync(int userId)
         {
-            List<BasketItem> basketItems = _basketItemDal.GetAllWithInclude(
+            List<BasketItem> result = await _basketItemDal.GetAllWithIncludeAsync(
                 include:
                     i => i.Include(b => b.Basket),
                 filter: p => p.UserId == userId);
-            return new SuccessDataResult<List<BasketItem>>(basketItems, Messages.Listed);
+            return result != null ? new SuccessDataResult<List<BasketItem>>(result, Messages.Listed) : new ErrorDataResult<List<BasketItem>>(Messages.NotListed);
         }
         #endregion
         #region Commands
+        [CacheRemoveAspect(@"
+        Business.Abstract.IBasketItemService.GetAllAsync,
+        Business.Abstract.IBasketItemService.GetAsync,
+        Business.Abstract.IBasketItemService.GetBasketItemsByIdUserIdAsync
+        ")]
         public async Task<IResult> UpdateAsync(BasketItem basketItem)
         {
-            Task<IDataResult<BasketItem>> updatedBasketItem = GetByIdAsync(basketItem.Id);
-            if (updatedBasketItem == null)
+            bool isExists = await _basketItemDal.IsExistAsync(q => q.Id == basketItem.Id);
+            if (!isExists)
             {
                 return new ErrorResult(Messages.NotFound);
             }
-            BasketItem result = await _basketItemDal.UpdateAsync(basketItem);
-            return result != null ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
+            bool result = await _basketItemDal.UpdateAsync(basketItem);
+            return result ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
         }
+        [CacheRemoveAspect(@"
+        Business.Abstract.IBasketItemService.GetAllAsync,
+        Business.Abstract.IBasketItemService.GetAsync,
+        Business.Abstract.IBasketItemService.GetBasketItemsByIdUserIdAsync
+        ")]
         public async Task<IResult> AddAsync(AddBasketItemDto basketItemDto)
         {
             Basket? doesUserHaveBasket = await _basketDal.GetAsync(p => p.UserId == basketItemDto.UserId);
             if (doesUserHaveBasket == null)
             {
-                basketItemDto.BasketId = _basketDal.AddAsync(new Basket { UserId = basketItemDto.UserId }).Result.Id;
+                basketItemDto.BasketId = await _basketDal.AddAsync(new Basket { UserId = basketItemDto.UserId });
             }
             else
             {
                 basketItemDto.BasketId = doesUserHaveBasket.Id;
             }
             BasketItem basketItem = _mapper.Map<BasketItem>(basketItemDto);
-            BasketItem result = await _basketItemDal.AddAsync(basketItem);
-            return result != null ? new SuccessResult(Messages.AddToBasket) : new ErrorResult(Messages.NotAdded);
+            int result = await _basketItemDal.AddAsync(basketItem);
+            return result > 0 ? new SuccessResult(Messages.AddToBasket) : new ErrorResult(Messages.NotAdded);
         }
+        [CacheRemoveAspect(@"
+        Business.Abstract.IBasketItemService.GetAllAsync,
+        Business.Abstract.IBasketItemService.GetAsync,
+        Business.Abstract.IBasketItemService.GetBasketItemsByIdUserIdAsync
+        ")]
         public async Task<IResult> DeleteAsync(int id)
         {
-            IDataResult<BasketItem> deletedBasketItem = await GetByIdAsync(id);
+            IDataResult<BasketItem> deletedBasketItem = await GetAsync(q => q.Id == id);
             if (deletedBasketItem == null)
             {
                 return new ErrorResult(Messages.NotFound);
             }
-            BasketItem result = await _basketItemDal.DeleteAsync(deletedBasketItem.Data);
-            return result != null ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
+            bool result = await _basketItemDal.DeleteAsync(deletedBasketItem.Data);
+            return result ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
         }
         #endregion
-        decimal calculateTotalPrice(List<BasketItem> basketItems)
-        {
-            decimal totalPrice = 0;
-            foreach (BasketItem item in basketItems)
-            {
-                totalPrice += item.Quantity * item.Product.Price;
-            }
-            return totalPrice;
-        }
     }
 }

@@ -16,9 +16,9 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("add-product-image-by-product-id")]
-        public IActionResult AddProductImageByProductId([FromForm] AddProductImageDto addProductImageDto)
+        public async Task<IActionResult> AddProductImageByProductIdAsync([FromForm] AddProductImageDto addProductImageDto)
         {
-            Core.Utilities.Results.IResult result = _productImageService.AddProductImageByProductId(addProductImageDto);
+            Core.Utilities.Results.IResult result = await _productImageService.AddProductImageByProductIdAsync(addProductImageDto);
             return result.Success ? Ok(result) : BadRequest(result);
         }
     }

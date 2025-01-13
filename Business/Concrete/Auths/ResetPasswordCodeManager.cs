@@ -4,6 +4,7 @@ using Core.Entities.Concrete.Auth;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.DTOs.Users;
+using System.Linq.Expressions;
 
 namespace Business.Concrete.Auths
 {
@@ -14,14 +15,14 @@ namespace Business.Concrete.Auths
         {
             _resetPasswordCodeDal = resetPasswordCodeDal;
         }
-        public IResult Add(ResetPasswordCode resetPasswordCode)
+        public async Task<IResult> AddAsync(ResetPasswordCode resetPasswordCode)
         {
-            _resetPasswordCodeDal.Add(resetPasswordCode);
-            return new SuccessResult(Messages.Added);
+            int result = await _resetPasswordCodeDal.AddAsync(resetPasswordCode);
+            return result > 0 ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
         }
-        public IResult ConfirmResetCode(string code)
+        public async Task<IResult> ConfirmResetCodeAsync(string code)
         {
-            ResetPasswordCode result = _resetPasswordCodeDal.Get(p => p.Code == code);
+            ResetPasswordCode result = await _resetPasswordCodeDal.GetAsync(p => p.Code == code);
             if (result.IsActive == false) { return new ErrorResult("link geçersizdir"); }
 
             bool IsAvailable;
@@ -30,9 +31,9 @@ namespace Business.Concrete.Auths
             if (IsAvailable == false) { return new ErrorResult("Linkin Süresi Geçmiştir."); }
             return new SuccessResult();
         }
-        public IResult ConfirmResetCodeWithUserId(ConfirmPasswordResetDto confirmPasswordResetDto)
+        public async Task<IResult> ConfirmResetCodeWithUserIdAsync(ConfirmPasswordResetDto confirmPasswordResetDto)
         {
-            ResetPasswordCode result = _resetPasswordCodeDal.Get(p => p.Code == confirmPasswordResetDto.Code);
+            ResetPasswordCode result = await _resetPasswordCodeDal.GetAsync(p => p.Code == confirmPasswordResetDto.Code);
 
             if (result.UserId != confirmPasswordResetDto.UserId) { return new ErrorResult("link geçersizdir"); }
 
@@ -45,32 +46,41 @@ namespace Business.Concrete.Auths
             if (IsAvailable == false) { return new ErrorResult("Linkin Süresi Geçmiştir."); }
             return new SuccessResult();
         }
-        public IResult Delete(ResetPasswordCode resetPasswordCode)
+        public async Task<IResult> DeleteAsync(ResetPasswordCode resetPasswordCode)
         {
-            _resetPasswordCodeDal.Delete(resetPasswordCode);
-            return new SuccessResult(Messages.Deleted);
+            bool result = await _resetPasswordCodeDal.DeleteAsync(resetPasswordCode);
+            return result ? new SuccessResult(Messages.Deleted) : new ErrorResult(Messages.NotDeleted);
         }
-        public IDataResult<List<ResetPasswordCode>> GetAll()
+        public async Task<IDataResult<List<ResetPasswordCode>>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            List<ResetPasswordCode>? result = await _resetPasswordCodeDal.GetAllAsync();
+            return result != null ? new SuccessDataResult<List<ResetPasswordCode>>(result, Messages.Listed) : new ErrorDataResult<List<ResetPasswordCode>>(Messages.NotListed);
         }
-        public IDataResult<ResetPasswordCode> GetByCode(string resetCode)
+        public async Task<IDataResult<ResetPasswordCode>> GetByCodeAsync(string resetCode)
         {
-            return new SuccessDataResult<ResetPasswordCode>(_resetPasswordCodeDal.Get(p => p.Code == resetCode), true, Messages.Listed);
+            ResetPasswordCode result = await _resetPasswordCodeDal.GetAsync(p => p.Code == resetCode);
+            return result != null ? new SuccessDataResult<ResetPasswordCode>(result, Messages.Found) : new ErrorDataResult<ResetPasswordCode>(Messages.NotFound);
 
         }
-        public IDataResult<ResetPasswordCode> GetById(int resetCodeID)
+        public async Task<IDataResult<ResetPasswordCode>> GetByIdAsync(int resetCodeID)
         {
-            throw new NotImplementedException();
+            ResetPasswordCode result = await _resetPasswordCodeDal.GetAsync(p => p.Id == resetCodeID);
+            return result != null ? new SuccessDataResult<ResetPasswordCode>(result, Messages.Found) : new ErrorDataResult<ResetPasswordCode>(Messages.NotFound);
         }
-        public IDataResult<ResetPasswordCode> GetByUserId(int userId)
+        public async Task<IDataResult<ResetPasswordCode>> GetByUserIdAsync(int userId)
         {
-            return new SuccessDataResult<ResetPasswordCode>(_resetPasswordCodeDal.Get(p => p.UserId == userId), true, Messages.Listed);
+            ResetPasswordCode result = await _resetPasswordCodeDal.GetAsync(p => p.UserId == userId);
+            return result != null ? new SuccessDataResult<ResetPasswordCode>(result, Messages.Found) : new ErrorDataResult<ResetPasswordCode>(Messages.NotFound);
         }
-        public IResult Update(ResetPasswordCode resetPasswordCode)
+        public async Task<IDataResult<ResetPasswordCode>> GetAsync(Expression<Func<ResetPasswordCode, bool>> filter)
         {
-            _resetPasswordCodeDal.Update(resetPasswordCode);
-            return new SuccessResult(Messages.Updated);
+            ResetPasswordCode result = await _resetPasswordCodeDal.GetAsync(filter);
+            return result != null ? new SuccessDataResult<ResetPasswordCode>(result, Messages.Found) : new ErrorDataResult<ResetPasswordCode>(Messages.NotFound);
+        }
+        public async Task<IResult> UpdateAsync(ResetPasswordCode resetPasswordCode)
+        {
+            bool result = await _resetPasswordCodeDal.UpdateAsync(resetPasswordCode);
+            return result ? new SuccessResult(Messages.Updated) : new ErrorResult(Messages.NotUpdated);
         }
 
     }

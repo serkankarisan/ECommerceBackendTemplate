@@ -24,13 +24,14 @@ namespace WebAPI.Controllers.Shopping
         [HttpGet("get-by-id")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            Core.Utilities.Results.IDataResult<BasketItem> result = await _basketItemService.GetByIdAsync(id);
+            Core.Utilities.Results.IDataResult<BasketItem> result = await _basketItemService.GetAsync(q => q.Id == id);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpGet("get-basket-items-by-user-id")]
-        public IActionResult GetBasketItemsByIdUserId(int userId)
+        public async Task<IActionResult> GetBasketItemsByIdUserId(int userId)
         {
-            return Ok(_basketItemService.GetBasketItemsByIdUserId(userId));
+            Core.Utilities.Results.IDataResult<List<BasketItem>> result = await _basketItemService.GetBasketItemsByIdUserIdAsync(userId);
+            return result.Success ? Ok(result) : BadRequest();
         }
         #endregion
         #region Commands

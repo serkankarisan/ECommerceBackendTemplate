@@ -21,6 +21,7 @@
         #region Auth
         public const string AuthorizationDenied = "Erişim Reddedildi";
         public const string UserRegistered = "Kullanıcı Kayıt Oldu.";
+        public const string UserNotRegistered = "Kullanıcı Kayıt Edilemedi!";
         public const string UserNotFound = "Kullanıcı Bulunamadı.";
         public const string PasswordError = "Parola Hatalı.";
         public const string SuccessfulLogin = "Başarıyla giriş yapıldı.";

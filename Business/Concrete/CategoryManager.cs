@@ -8,6 +8,8 @@ using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Concrete;
 using Entities.DTOs.Categories;
+using Entities.DTOs.Categories.TrendyolDtos;
+using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
 namespace Business.Concrete
@@ -42,9 +44,9 @@ namespace Business.Concrete
             return result != null ? new SuccessDataResult<CategoryDto>(_mapper.Map<CategoryDto>(result), Messages.Listed) : new ErrorDataResult<CategoryDto>(Messages.NotListed);
         }
         [CacheAspect(60)]
-        public async Task<IDataResult<List<CategoryDto>>> GetChildCategoriesByCategoryId(int categoryId)
+        public async Task<IDataResult<List<CategoryDto>>> GetChildCategoriesByCategoryIdAsync(int categoryId)
         {
-            List<Category>? result = await _categoryDal.GetChildCategoriesByCategoryId(categoryId);
+            List<Category>? result = await _categoryDal.GetChildCategoriesByCategoryIdAsync(categoryId);
             return result != null ? new SuccessDataResult<List<CategoryDto>>(_mapper.Map<List<CategoryDto>>(result), Messages.Listed) : new ErrorDataResult<List<CategoryDto>>(_mapper.Map<List<CategoryDto>>(result), Messages.Error);
         }
         #endregion
@@ -53,13 +55,13 @@ namespace Business.Concrete
         Business.Abstract.ICategoryService.GetAsync,
         Business.Abstract.ICategoryService.GetAllAsync,
         Business.Abstract.ICategoryService.GetByCategoryIdAsync,
-        Business.Abstract.ICategoryService.GetChildCategoriesByCategoryId
+        Business.Abstract.ICategoryService.GetChildCategoriesByCategoryIdAsync
         ")]
-        public IDataResult<CategoryDto> AddWithDto(AddCategoryDto addCategoryDto)
+        public async Task<IDataResult<CategoryDto>> AddWithDtoAsync(AddCategoryDto addCategoryDto)
         {
             if (addCategoryDto.ParentCategoryId != null)
             {
-                if (!_categoryDal.IsExist(p => p.Id == addCategoryDto.ParentCategoryId))
+                if (!await _categoryDal.IsExistAsync(p => p.Id == addCategoryDto.ParentCategoryId))
                 {
                     return new ErrorDataResult<CategoryDto>(Messages.ParentCategoryNotFound);
                 }
@@ -71,40 +73,40 @@ namespace Business.Concrete
                 Description = addCategoryDto.Description,
                 ParentCategoryId = addCategoryDto.ParentCategoryId
             };
-            IResult result = Add(newCategory);
-            if (result.Success)
+            int result = await _categoryDal.AddAsync(newCategory);
+            if (result > 0)
             {
-                return new SuccessDataResult<CategoryDto>(_mapper.Map<CategoryDto>(newCategory), result.Message);
+                return new SuccessDataResult<CategoryDto>(_mapper.Map<CategoryDto>(newCategory), Messages.Added);
             }
             else
             {
-                return new ErrorDataResult<CategoryDto>(_mapper.Map<CategoryDto>(newCategory), result.Message);
+                return new ErrorDataResult<CategoryDto>(_mapper.Map<CategoryDto>(newCategory), Messages.NotAdded);
             }
         }
         [CacheRemoveAspect(@"
         Business.Abstract.ICategoryService.GetAsync,
         Business.Abstract.ICategoryService.GetAllAsync,
         Business.Abstract.ICategoryService.GetByCategoryIdAsync,
-        Business.Abstract.ICategoryService.GetChildCategoriesByCategoryId
+        Business.Abstract.ICategoryService.GetChildCategoriesByCategoryIdAsync
         ")]
-        public IResult Add(Category category)
+        public async Task<IResult> AddAsync(Category category)
         {
-            bool result = _categoryDal.Add(category);
-            return result ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
+            int result = await _categoryDal.AddAsync(category);
+            return result > 0 ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
         }
         [CacheRemoveAspect(@"
         Business.Abstract.ICategoryService.GetAsync,
         Business.Abstract.ICategoryService.GetAllAsync,
         Business.Abstract.ICategoryService.GetByCategoryIdAsync,
-        Business.Abstract.ICategoryService.GetChildCategoriesByCategoryId
+        Business.Abstract.ICategoryService.GetChildCategoriesByCategoryIdAsync
         ")]
-        public IResult Delete(int id)
+        public async Task<IResult> DeleteAsync(int id)
         {
             bool result = false;
-            Category category = _categoryDal.Get(p => p.Id == id);
+            Category category = await _categoryDal.GetAsync(p => p.Id == id);
             if (category != null)
             {
-                result = _categoryDal.Delete(category);
+                result = await _categoryDal.DeleteAsync(category);
             }
             return result ? new SuccessResult("Silindi") : new ErrorResult("Silinemedi hata oluştu");
         }
@@ -112,18 +114,40 @@ namespace Business.Concrete
         Business.Abstract.ICategoryService.GetAsync,
         Business.Abstract.ICategoryService.GetAllAsync,
         Business.Abstract.ICategoryService.GetByCategoryIdAsync,
-        Business.Abstract.ICategoryService.GetChildCategoriesByCategoryId
+        Business.Abstract.ICategoryService.GetChildCategoriesByCategoryIdAsync
         ")]
-        public IResult Update(Category category)
+        public async Task<IResult> UpdateAsync(Category category)
         {
             bool result = false;
-            Category getCategory = _categoryDal.Get(p => p.Id == category.Id);
-            if (getCategory != null)
+            bool isExists = await _categoryDal.IsExistAsync(p => p.Id == category.Id);
+            if (!isExists)
             {
-                result = _categoryDal.Update(category);
+                result = await _categoryDal.UpdateAsync(category);
             }
             return result ? new SuccessResult("Güncellendi") : new ErrorResult("Güncellenemedi hata oluştu");
         }
         #endregion
+        public async Task AddCategoryAsync(TrendyolCategoryDto category)
+        {
+            try
+            {
+                var result = await AddWithDtoAsync(new AddCategoryDto { Name = category.Name, Description = category.Name, ParentCategoryId = category.ParentId });
+                if (result.Success)
+                {
+                    IEnumerable< TrendyolCategoryDto >subCategories = category.SubCategories;
+                    if (subCategories != null)
+                    {
+                        foreach (var subCategory in subCategories)
+                        {
+                            subCategory.ParentId = result.Data.Id;
+                            await AddCategoryAsync(subCategory);
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
     }
 }

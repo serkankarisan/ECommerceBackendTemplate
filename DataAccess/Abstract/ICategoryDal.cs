@@ -6,10 +6,10 @@ namespace DataAccess.Abstract
     public interface ICategoryDal : IEntityRepository<Category>
     {
         #region Queries
-        List<Category> GetAllParentCategory();
-        int GetAllParentCategoryCount();
-        Task<List<Category>> GetChildCategoriesByCategoryId(int categoryId);
-        bool CategoryIsExist(string name);
+        Task<List<Category>> GetAllParentCategoryAsync();
+        Task<int> GetAllParentCategoryCountAsync();
+        Task<List<Category>> GetChildCategoriesByCategoryIdAsync(int categoryId);
+        Task<bool> CategoryIsExistAsync(string name);
         #endregion
     }
 }

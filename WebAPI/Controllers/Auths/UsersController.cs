@@ -19,27 +19,27 @@ namespace WebAPI.Controllers.Auths
             _authService = authService;
         }
         [HttpPost("add-user")]
-        public IActionResult AddUser(User user)
+        public async Task<IActionResult> AddUserAsync(User user)
         {
-            Core.Utilities.Results.IResult result = _userService.Add(user);
+            Core.Utilities.Results.IResult result = await _userService.AddAsync(user);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpPost("update-user")]
-        public IActionResult UpdateUser(User user)
+        public async Task<IActionResult> UpdateUserAsync(User user)
         {
-            Core.Utilities.Results.IResult result = _userService.Update(user);
+            Core.Utilities.Results.IResult result = await _userService.UpdateAsync(user);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpPost("delete-user")]
-        public IActionResult DeleteUser(User user)
+        public async Task<IActionResult> DeleteUserAsync(User user)
         {
-            Core.Utilities.Results.IResult result = _userService.Delete(user);
+            Core.Utilities.Results.IResult result = await _userService.DeleteAsync(user);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpPut("update-infos")]
-        public IActionResult UpdateInfos(User user)
+        public async Task<IActionResult> UpdateInfosAsync(User user)
         {
-            Core.Utilities.Results.IResult result = _userService.UpdateInfos(user);
+            Core.Utilities.Results.IResult result = await _userService.UpdateInfosAsync(user);
             if (result.Success)
             {
                 return Ok(result);
@@ -47,9 +47,9 @@ namespace WebAPI.Controllers.Auths
             return BadRequest(result);
         }
         [HttpGet("get-by-id")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetByIdAsync(int id)
         {
-            Core.Utilities.Results.IDataResult<User> result = _userService.GetById(id);
+            Core.Utilities.Results.IDataResult<User> result = await _userService.GetAsync(q => q.Id == id);
             if (result.Success)
             {
                 return Ok(result);
@@ -57,21 +57,21 @@ namespace WebAPI.Controllers.Auths
             return BadRequest(result);
         }
         [HttpGet("get-user-by-email")]
-        public IActionResult GetByEmail(string email)
+        public async Task<IActionResult> GetByEmailAsync(string email)
         {
-            Core.Utilities.Results.IDataResult<User> result = _userService.GetUserByEmail(email);
+            Core.Utilities.Results.IDataResult<User> result = await _userService.GetUserByEmailAsync(email);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpPost("send-password-reset-mail")]
-        public IActionResult SendEmail(string email)
+        public async Task<IActionResult> SendEmailAsync(string email)
         {
-            Core.Utilities.Results.IResult result = _authService.SendResetCodeMail(email);
+            Core.Utilities.Results.IResult result = await _authService.SendResetCodeMailAsync(email);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpPost("confirm-password-reset-code")]
-        public IActionResult ConfirmPasswordResetCode(ConfirmPasswordResetDto confirmPasswordResetDto)
+        public async Task<IActionResult> ConfirmPasswordResetCodeAsync(ConfirmPasswordResetDto confirmPasswordResetDto)
         {
-            Core.Utilities.Results.IResult result = _resetPasswordCodeService.ConfirmResetCodeWithUserId(confirmPasswordResetDto);
+            Core.Utilities.Results.IResult result = await _resetPasswordCodeService.ConfirmResetCodeWithUserIdAsync(confirmPasswordResetDto);
             return result.Success ? Ok(result) : BadRequest(result);
         }
     }

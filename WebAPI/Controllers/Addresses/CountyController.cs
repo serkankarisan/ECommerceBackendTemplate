@@ -23,7 +23,7 @@ namespace WebAPI.Controllers.Addresses
         [HttpGet("get-by-id")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            Core.Utilities.Results.IDataResult<County> result = await _countyService.GetByIdAsync(id);
+            Core.Utilities.Results.IDataResult<County> result = await _countyService.GetAsync(q => q.Id == id);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpGet("get-by-city-id")]

@@ -23,7 +23,7 @@ namespace WebAPI.Controllers
         [HttpGet("get-by-id")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            Core.Utilities.Results.IDataResult<Brand> result = await _brandService.GetByIdAsync(id);
+            Core.Utilities.Results.IDataResult<Brand> result = await _brandService.GetAsync(q => q.Id == id);
             return result.Success ? Ok(result) : BadRequest();
         }
         #endregion

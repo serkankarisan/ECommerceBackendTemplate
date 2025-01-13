@@ -18,9 +18,9 @@ namespace WebAPI.Controllers
         }
         #region Queries
         [HttpGet("get-by-id")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetByIdAsync(int id)
         {
-            Core.Utilities.Results.IDataResult<Product> result = _productService.Get(id);
+            Core.Utilities.Results.IDataResult<Product> result = await _productService.GetAsync(q => q.Id == id);
             if (result.Success)
             {
                 return Ok(result);
@@ -34,95 +34,86 @@ namespace WebAPI.Controllers
             return products.Success ? Ok(products) : BadRequest(products);
         }
         [HttpGet("get-most-expensive-product")]
-        public IActionResult GetMostExpensiveProduct()
+        public async Task<IActionResult> GetMostExpensiveProductAsync()
         {
-            return Ok(_productService.GetMostExpensiveProduct());
+            return Ok(await _productService.GetMostExpensiveProductAsync());
         }
         [HttpGet("get-product-details-dto")]
-        public async Task<IActionResult> GetProductDetailDto(int index, int size)
+        public async Task<IActionResult> GetProductDetailDtoAsync(int index, int size)
         {
             Core.Utilities.Results.IDataResult<Core.Utilities.Paging.IPaginate<ProductDetailDto>> products = await _productService.GetProductDetailDtoAsync(index, size);
             return Ok(products);
         }
-        [HttpGet("get-related-products-by-category-id")]
-        public async Task<IActionResult> GetRelatedProductsByCategoryId(string categoryId, int index = 0, int size = 20)
+        [HttpGet("get-related-products-by-category-name")]
+        public async Task<IActionResult> GetRelatedProductsByCategoryNameAsync(string categoryName, int index = 0, int size = 20)
         {
-            Core.Utilities.Results.IDataResult<Core.Utilities.Paging.IPaginate<ProductDetailDto>> products = await _productService.GetRelatedProductsByCategoryId(categoryId, index: index, size: size);
+            Core.Utilities.Results.IDataResult<Core.Utilities.Paging.IPaginate<ProductDetailDto>> products = await _productService.GetRelatedProductsByCategoryNameAsync(categoryName, index: index, size: size);
             return Ok(products);
         }
         [HttpGet("get-related-products-by-product-id")]
-        public async Task<IActionResult> GetRelatedProductsByProductId(int productId, int index = 0, int size = 20)
+        public async Task<IActionResult> GetRelatedProductsByProductIdAsync(int productId, int index = 0, int size = 20)
         {
-            Core.Utilities.Results.IDataResult<Core.Utilities.Paging.IPaginate<ProductDetailDto>> products = await _productService.GetRelatedProductsByProductId(productId, index: index, size: size);
+            Core.Utilities.Results.IDataResult<Core.Utilities.Paging.IPaginate<ProductDetailDto>> products = await _productService.GetRelatedProductsByProductIdAsync(productId, index: index, size: size);
             return Ok(products);
         }
         [HttpGet("get-products-count-from-dal")]
-        public IActionResult GetProductsCountFromDal()
+        public async Task<IActionResult> GetProductsCountFromDalAsync()
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
             stopwatch.Start();
-            int result = _productService.GetProductsCountFromDal();
-            stopwatch.Stop();
-            return Ok($"Total Count :  {result}\nTotal Time : {stopwatch.ElapsedMilliseconds} ms");
-        }
-        [HttpGet("get-products-count-from-bll")]
-        public IActionResult GetProductsCountFromBussines()
-        {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            stopwatch.Start();
-            int result = _productService.GetProductsCountFromBussines();
+            int result = await _productService.GetProductsCountFromDalAsync();
             stopwatch.Stop();
             return Ok($"Total Count :  {result}\nTotal Time : {stopwatch.ElapsedMilliseconds} ms");
         }
         [HttpGet("get-popular-products")]
-        public IActionResult GetPopularProducts(int index = 0, int size = 20)
+        public async Task<IActionResult> GetPopularProductsAsync(int index = 0, int size = 20)
         {
-            return Ok(_productService.GetPopularProducts(index, size));
+            return Ok(await _productService.GetPopularProductsAsync(index, size));
         }
         [HttpGet("get-product-detail-by-id")]
-        public IActionResult GetProductDetailByIdAsync(int id)
+        public async Task<IActionResult> GetProductDetailByIdAsync(int id)
         {
-            return Ok(_productService.GetProductDetailByIdAsync(id));
+            return Ok(await _productService.GetProductDetailByIdAsync(id));
         }
         #endregion
         #region Commands
         [HttpPost("add")]
-        public IActionResult Add(AddProductDto addProductDto)
+        public async Task<IActionResult> AddAsync(AddProductDto addProductDto)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
             stopwatch.Start();
-            Core.Utilities.Results.IResult result = _productService.Add(addProductDto);
+            Core.Utilities.Results.IResult result = await _productService.AddAsync(addProductDto);
             stopwatch.Stop();
             return result.Success ? Ok($"Total Count : {result}\nTotal Time : {stopwatch.ElapsedMilliseconds} ms") : BadRequest(result);
         }
         [HttpPost("add-range")]
-        public IActionResult AddRange(List<Product> products)
+        public async Task<IActionResult> AddRangeAsync(List<Product> products)
         {
-            Core.Utilities.Results.IResult result = _productService.AddRange(products);
+            Core.Utilities.Results.IResult result = await _productService.AddRangeAsync(products);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpPost("update")]
-        public IActionResult Update(Product product)
+        public async Task<IActionResult> UpdateAsync(Product product)
         {
-            Core.Utilities.Results.IResult result = _productService.Update(product);
+            Core.Utilities.Results.IResult result = await _productService.UpdateAsync(product);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpPost("delete")]
-        public IActionResult Delete(int productId)
+        public async Task<IActionResult> DeleteAsync(int productId)
         {
-            Core.Utilities.Results.IResult result = _productService.Delete(productId);
+            Core.Utilities.Results.IResult result = await _productService.DeleteAsync(productId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpPost("add-with-image")]
-        public IActionResult AddWithImage([FromForm] AddProductWithImageDto addProductWithImageDto)
+        public async Task<IActionResult> AddWithImageAsync([FromForm] AddProductWithImageDto addProductWithImageDto)
         {
-            Core.Utilities.Results.IResult result = _productService.AddWithImage(addProductWithImageDto);
+            Core.Utilities.Results.IResult result = await _productService.AddWithImageAsync(addProductWithImageDto);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpPost("get-product-details-paginate-dynamic")]
-        public IActionResult GetProductDetailsPaginateDynamic(int index, int size, [FromBody] Dynamic dynamic)
+        public async Task<IActionResult> GetProductDetailsPaginateDynamicAsync(int index, int size, [FromBody] Dynamic dynamic)
         {
-            Core.Utilities.Results.IDataResult<Core.Utilities.Paging.IPaginate<Product>> products = _productService.GetListDynamic(index, size, dynamic);
+            Core.Utilities.Results.IDataResult<Core.Utilities.Paging.IPaginate<Product>> products = await _productService.GetListDynamicAsync(index, size, dynamic);
             return Ok(products);
         }
         #endregion

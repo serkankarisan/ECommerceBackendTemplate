@@ -7,13 +7,13 @@ namespace Business.Abstract.Auths
 {
     public interface IAuthService
     {
-        IDataResult<User> Register(UserForRegisterDto userForRegisterDto, string password);
-        IDataResult<User> Login(UserForLoginDto userForLoginDto);
-        IDataResult<UserForUpdateDto> Update(UserForUpdateDto userForUpdate);
-        IResult UserExists(string email);
-        IDataResult<AccessToken> CreateAccessToken(User user);
-        IResult ChangePassword(ChangePasswordDto changePasswordDto);
-        IResult PasswordReset(PasswordResetDto passwordResetDto);
-        IResult SendResetCodeMail(string email);
+        Task<IDataResult<User>> RegisterAsync(UserForRegisterDto userForRegisterDto, string password);
+        Task<IDataResult<User>> LoginAsync(UserForLoginDto userForLoginDto);
+        Task<IDataResult<UserForUpdateDto>> UpdateAsync(UserForUpdateDto userForUpdate);
+        Task<IDataResult<AccessToken>> CreateAccessTokenAsync(User user);
+        Task<IResult> ChangePasswordAsync(ChangePasswordDto changePasswordDto);
+        Task<IResult> PasswordResetAsync(PasswordResetDto passwordResetDto);
+        Task<IResult> SendResetCodeMailAsync(string email);
+        Task<IResult> IsExistAsync(string email);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Core.Utilities.Paging;
 using Core.Utilities.Results;
 using Entities.Concrete;
+using System.Linq.Expressions;
 
 namespace Business.Abstract
 {
@@ -10,6 +11,6 @@ namespace Business.Abstract
         Task<IResult> UpdateAsync(Brand brand);
         Task<IResult> DeleteAsync(int id);
         Task<IDataResult<IPaginate<Brand>>> GetAllAsync(int index, int size);
-        Task<IDataResult<Brand>> GetByIdAsync(int id);
+        Task<IDataResult<Brand>> GetAsync(Expression<Func<Brand, bool>> filter);
     }
 }

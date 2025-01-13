@@ -23,33 +23,40 @@ namespace Business.Utilities.Mail
             _userService = userService;
         }
 
-        public IResult SendMailAsync(string to, string subject, string body, bool isBodyHtml = true)
+        public async Task<IResult> SendMailAsync(string to, string subject, string body, bool isBodyHtml = true)
         {
-            SendMailAsync(new[] { to }, subject, body, isBodyHtml);
-            return new SuccessResult("Mail Gönderildi.");
+            IResult result = await SendMailAsync(new[] { to }, subject, body, isBodyHtml);
+            return result.Success ? new SuccessResult("Mail Gönderildi.") : new ErrorResult("Mail Gönderilemedi!");
         }
 
-        public IResult SendMailAsync(string[] tos, string subject, string body, bool isBodyHtml = true)
+        public async Task<IResult> SendMailAsync(string[] tos, string subject, string body, bool isBodyHtml = true)
         {
-            MailMessage mail = new MailMessage();
-            mail.IsBodyHtml = isBodyHtml;
-            foreach (string to in tos)
-                mail.To.Add(to);
-            mail.Subject = subject;
-            mail.Body = body;
-            mail.From = new MailAddress(_configuration["Mail:Email"], "RentACar", System.Text.Encoding.UTF8);
+            try
+            {
+                MailMessage mail = new MailMessage();
+                mail.IsBodyHtml = isBodyHtml;
+                foreach (string to in tos)
+                    mail.To.Add(to);
+                mail.Subject = subject;
+                mail.Body = body;
+                mail.From = new MailAddress(_configuration["Mail:Email"], "RentACar", System.Text.Encoding.UTF8);
 
 
-            SmtpClient smtp = new SmtpClient();
-            smtp.Credentials = new NetworkCredential(_configuration["Mail:Email"], _configuration["Mail:Password"]);
-            smtp.Port = Convert.ToInt32(_configuration["Mail:Port"]);
-            smtp.EnableSsl = true;
-            smtp.Host = _configuration["Mail:Host"];
-            smtp.SendMailAsync(mail);
+                SmtpClient smtp = new SmtpClient();
+                smtp.Credentials = new NetworkCredential(_configuration["Mail:Email"], _configuration["Mail:Password"]);
+                smtp.Port = Convert.ToInt32(_configuration["Mail:Port"]);
+                smtp.EnableSsl = true;
+                smtp.Host = _configuration["Mail:Host"];
+                await smtp.SendMailAsync(mail);
+            }
+            catch (Exception ex)
+            {
+                return new ErrorResult("Mail Gönderilemedi!");
+            }
             return new SuccessResult("Mail Gönderildi.");
 
         }
-        public IResult SendPasswordResetMailAsync(ResetPasswordCode resetPasswordCode)
+        public async Task<IResult> SendPasswordResetMailAsync(ResetPasswordCode resetPasswordCode)
         {
             StringBuilder mail = new StringBuilder();
             mail.AppendLine("Merhaba<br>Eğer yeni şifre talebinde bulunduysanız aşağıdaki linkten şifrenizi yenileyebilirsiniz.<br><strong><a target=\"_blank\" href=\"");
@@ -59,8 +66,8 @@ namespace Business.Utilities.Mail
             mail.AppendLine("&code=" + resetPasswordCode.Code);
             mail.AppendLine("\">Yeni şifre talebi için tıklayınız...</a></strong><br><br><span style=\"font-size:12px;\">NOT : Eğer ki bu talep tarafınızca gerçekleştirilmemişse lütfen bu maili ciddiye almayınız.</span><br>Saygılarımızla...<br><br><br>Software Solution Team");
 
-            SendMailAsync(resetPasswordCode.UserEmail, "Şifre Yenileme Talebi", mail.ToString());
-            return new SuccessResult("Mail Gönderildi.");
+            IResult result = await SendMailAsync(resetPasswordCode.UserEmail, "Şifre Yenileme Talebi", mail.ToString());
+            return result.Success ? new SuccessResult("Mail Gönderildi.") : new ErrorResult("Mail Gönderilemedi!");
         }
     }
 }
