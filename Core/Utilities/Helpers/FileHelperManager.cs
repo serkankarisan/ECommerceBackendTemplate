@@ -63,7 +63,7 @@ public class FileHelperManager : IFileHelperService
         {
             Directory.CreateDirectory(UploadDirectoryPath);
         }
-        var result = ("", "", false);
+        (string, string, bool) result = ("", "", false);
         try
         {
             if (file == null)
@@ -81,8 +81,8 @@ public class FileHelperManager : IFileHelperService
                 {
                     return ("", false);
                 }
-                var sourcePath = Path.GetTempFileName();
-                using (var stream = new FileStream(sourcePath, FileMode.Create))
+                string sourcePath = Path.GetTempFileName();
+                using (FileStream stream = new FileStream(sourcePath, FileMode.Create))
                 {
                     file.CopyTo(stream);
                 }
@@ -130,7 +130,7 @@ public class FileHelperManager : IFileHelperService
     }
     public (string, bool) UpdateFile(IFormFile file, string oldFilePath)
     {
-        var result = ("", "", false);
+        (string, string, bool) result = ("", "", false);
         try
         {
             if (file == null)
@@ -145,8 +145,8 @@ public class FileHelperManager : IFileHelperService
                 {
                     return ("", false);
                 }
-                var sourcePath = Path.GetTempFileName();
-                using (var stream = new FileStream(sourcePath, FileMode.Create))
+                string sourcePath = Path.GetTempFileName();
+                using (FileStream stream = new FileStream(sourcePath, FileMode.Create))
                 {
                     file.CopyTo(stream);
                 }

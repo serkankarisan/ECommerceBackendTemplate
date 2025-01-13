@@ -32,7 +32,7 @@ namespace Business.Concrete.Auths
         }
         public IResult UpdateInfos(User user)
         {
-            var userToUpdate = GetById(user.Id).Data;
+            User userToUpdate = GetById(user.Id).Data;
             userToUpdate.FirstName = user.FirstName;
             userToUpdate.LastName = user.LastName;
             userToUpdate.Email = user.Email;
@@ -53,7 +53,7 @@ namespace Business.Concrete.Auths
         }
         public IDataResult<User> GetById(int id)
         {
-            var result = _userDal.Get(p => p.Id == id);
+            User result = _userDal.Get(p => p.Id == id);
             return new SuccessDataResult<User>(result);
         }
     }

@@ -17,54 +17,54 @@ namespace Business.Concrete.Addresses
         #region Queries
         public async Task<IDataResult<IPaginate<District>>> GetAllAsync(int index, int size)
         {
-            var result = await _districtDal.GetListAsync(index: index, size: size);
+            IPaginate<District>? result = await _districtDal.GetListAsync(index: index, size: size);
             return result != null ? new SuccessDataResult<IPaginate<District>>(result, Messages.Listed) : new ErrorDataResult<IPaginate<District>>(result, Messages.NotListed);
         }
         public async Task<IDataResult<District>> GetByIdAsync(int id)
         {
-            var result = await _districtDal.GetAsync(p => p.Id == id);
+            District? result = await _districtDal.GetAsync(p => p.Id == id);
             return result != null ? new SuccessDataResult<District>(result, Messages.Listed) : new ErrorDataResult<District>(result, Messages.NotListed);
         }
         public async Task<IDataResult<IPaginate<District>>> GetByCountyIdAsync(int index, int size, string countyId)
         {
-            var result = await _districtDal.GetListAsync(index: index, size: size, predicate: p => p.CountyId == countyId);
+            IPaginate<District>? result = await _districtDal.GetListAsync(index: index, size: size, predicate: p => p.CountyId == countyId);
             return result != null ? new SuccessDataResult<IPaginate<District>>(result) : new ErrorDataResult<IPaginate<District>>(result);
         }
         #endregion
         #region Commands
         public async Task<IResult> UpdateAsync(District district)
         {
-            var updatedAddress = await _districtDal.GetAsync(p => p.Id == district.Id);
+            District? updatedAddress = await _districtDal.GetAsync(p => p.Id == district.Id);
             if (updatedAddress == null)
                 return new ErrorResult(Messages.NotFound);
 
-            var result = await _districtDal.UpdateAsync(updatedAddress);
+            District result = await _districtDal.UpdateAsync(updatedAddress);
             return result != null ? new SuccessResult(Messages.Updated) : new ErrorResult(Messages.NotUpdated);
         }
         public async Task<IResult> AddAsync(District district)
         {
-            var result = await _districtDal.AddAsync(district);
+            District result = await _districtDal.AddAsync(district);
             return result != null ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
         }
         public async Task<IResult> DeleteAsync(int id)
         {
-            var deletedDistrict = await _districtDal.GetAsync(p => p.Id == id);
+            District? deletedDistrict = await _districtDal.GetAsync(p => p.Id == id);
             if (deletedDistrict == null)
                 return new ErrorResult(Messages.NotFound);
 
-            var result = await _districtDal.DeleteAsync(deletedDistrict);
+            District result = await _districtDal.DeleteAsync(deletedDistrict);
             return result != null ? new SuccessResult(Messages.Deleted) : new ErrorResult(Messages.NotDeleted);
         }
 
         public IDataResult<List<District>> GetAllFromBussiness()
         {
-            var result = _districtDal.GetAll().Where(p => p.Id % 2 == 0).ToList();
+            List<District> result = _districtDal.GetAll().Where(p => p.Id % 2 == 0).ToList();
             return new SuccessDataResult<List<District>>(result, Messages.Listed);
         }
 
         public IDataResult<List<District>> GetAllFromDal()
         {
-            var result = _districtDal.GetAllFromDal();
+            List<District> result = _districtDal.GetAllFromDal();
             return new SuccessDataResult<List<District>>(result, Messages.Listed);
         }
         #endregion

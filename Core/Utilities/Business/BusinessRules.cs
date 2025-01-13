@@ -11,7 +11,7 @@ namespace Core.Utilities.Business
         /// <returns>Başarısız olan ilk kuralın sonucunu döner, aksi takdirde null döner.</returns>
         public static IResult? Run(params IResult[] logics)
         {
-            foreach (var logic in logics)
+            foreach (IResult logic in logics)
             {
                 if (!logic.Success)
                 {
@@ -28,9 +28,9 @@ namespace Core.Utilities.Business
         /// <returns>Başarısız olan ilk kuralın sonucunu döner, aksi takdirde null döner.</returns>
         public static async Task<IResult?> RunAsync(params Func<Task<IResult>>[] logics)
         {
-            foreach (var logic in logics)
+            foreach (Func<Task<IResult>> logic in logics)
             {
-                var result = await logic();
+                IResult result = await logic();
                 if (!result.Success)
                 {
                     return result; // Başarısız olan ilk kuralı döndür

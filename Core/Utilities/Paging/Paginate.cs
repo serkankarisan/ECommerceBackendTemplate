@@ -4,7 +4,7 @@ public class Paginate<T> : IPaginate<T>
 {
     public Paginate(IEnumerable<T> source, int index, int size, int from)
     {
-        var enumerable = source as T[] ?? source.ToArray();
+        T[] enumerable = source as T[] ?? source.ToArray();
 
         if (from > index)
             throw new ArgumentException($"indexFrom: {from} > pageIndex: {index}, must indexFrom <= pageIndex");
@@ -52,7 +52,7 @@ public class Paginate<TSource, TResult> : IPaginate<TResult>
     public Paginate(IEnumerable<TSource> source, Func<IEnumerable<TSource>, IEnumerable<TResult>> converter,
                     int index, int size, int from)
     {
-        var enumerable = source as TSource[] ?? source.ToArray();
+        TSource[] enumerable = source as TSource[] ?? source.ToArray();
 
         if (from > index) throw new ArgumentException($"From: {from} > Index: {index}, must From <= Index");
 
@@ -64,7 +64,7 @@ public class Paginate<TSource, TResult> : IPaginate<TResult>
             Count = queryable.Count();
             Pages = (int)Math.Ceiling(Count / (double)Size);
 
-            var items = queryable.Skip((Index - From) * Size).Take(Size).ToArray();
+            TSource[] items = queryable.Skip((Index - From) * Size).Take(Size).ToArray();
 
             Items = new List<TResult>(converter(items));
         }
@@ -76,7 +76,7 @@ public class Paginate<TSource, TResult> : IPaginate<TResult>
             Count = enumerable.Count();
             Pages = (int)Math.Ceiling(Count / (double)Size);
 
-            var items = enumerable.Skip((Index - From) * Size).Take(Size).ToArray();
+            TSource[] items = enumerable.Skip((Index - From) * Size).Take(Size).ToArray();
 
             Items = new List<TResult>(converter(items));
         }

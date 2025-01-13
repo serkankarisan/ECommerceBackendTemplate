@@ -17,19 +17,19 @@ namespace WebAPI.Controllers.Addresses
         [HttpGet("getall")]
         public async Task<IActionResult> GetAllAsync(int index, int size)
         {
-            var result = await _districtService.GetAllAsync(index, size);
+            Core.Utilities.Results.IDataResult<Core.Utilities.Paging.IPaginate<District>> result = await _districtService.GetAllAsync(index, size);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpGet("get-by-id")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            var result = await _districtService.GetByIdAsync(id);
+            Core.Utilities.Results.IDataResult<District> result = await _districtService.GetByIdAsync(id);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpGet("get-by-county-id")]
         public async Task<IActionResult> GetByCountyIdAsync(int index, int size, string countyId)
         {
-            var result = await _districtService.GetByCountyIdAsync(index: index, size: size, countyId: countyId);
+            Core.Utilities.Results.IDataResult<Core.Utilities.Paging.IPaginate<District>> result = await _districtService.GetByCountyIdAsync(index: index, size: size, countyId: countyId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         #endregion
@@ -37,19 +37,19 @@ namespace WebAPI.Controllers.Addresses
         [HttpPost("add")]
         public async Task<IActionResult> AddAsync(District district)
         {
-            var result = await _districtService.AddAsync(district);
+            Core.Utilities.Results.IResult result = await _districtService.AddAsync(district);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpPost("update")]
         public async Task<IActionResult> UpdateAsync(District district)
         {
-            var result = await _districtService.UpdateAsync(district);
+            Core.Utilities.Results.IResult result = await _districtService.UpdateAsync(district);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpPost("delete")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
-            var result = await _districtService.DeleteAsync(id);
+            Core.Utilities.Results.IResult result = await _districtService.DeleteAsync(id);
             return result.Success ? Ok(result) : BadRequest();
         }
         #endregion

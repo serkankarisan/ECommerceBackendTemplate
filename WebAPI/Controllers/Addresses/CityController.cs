@@ -17,13 +17,13 @@ namespace WebAPI.Controllers.Addresses
         [HttpGet("getall")]
         public async Task<IActionResult> GetAllAsync(int index, int size)
         {
-            var result = await _cityService.GetAllAsync(index, size);
+            Core.Utilities.Results.IDataResult<Core.Utilities.Paging.IPaginate<City>> result = await _cityService.GetAllAsync(index, size);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpGet("get-by-id")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            var result = await _cityService.GetByIdAsync(id);
+            Core.Utilities.Results.IDataResult<City> result = await _cityService.GetByIdAsync(id);
             return result.Success ? Ok(result) : BadRequest();
         }
         #endregion
@@ -31,19 +31,19 @@ namespace WebAPI.Controllers.Addresses
         [HttpPost("add")]
         public async Task<IActionResult> AddAsync(City city)
         {
-            var result = await _cityService.AddAsync(city);
+            Core.Utilities.Results.IResult result = await _cityService.AddAsync(city);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpPost("update")]
         public async Task<IActionResult> UpdateAsync(City city)
         {
-            var result = await _cityService.UpdateAsync(city);
+            Core.Utilities.Results.IResult result = await _cityService.UpdateAsync(city);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpPost("delete")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
-            var result = await _cityService.DeleteAsync(id);
+            Core.Utilities.Results.IResult result = await _cityService.DeleteAsync(id);
             return result.Success ? Ok(result) : BadRequest();
         }
         #endregion

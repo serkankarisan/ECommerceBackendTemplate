@@ -18,7 +18,7 @@ namespace DataAccess.Concrete.EntityFramework.AddressEfConcrete
     {
         public List<District> GetAllFromDal()
         {
-            using (var _context = new ECommerceContext())
+            using (ECommerceContext _context = new ECommerceContext())
             {
                 List<District> result = _context.Districts.Where(p => p.Id % 2 == 0).ToList();
                 return result;

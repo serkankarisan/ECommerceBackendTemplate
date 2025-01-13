@@ -21,25 +21,25 @@ namespace WebAPI.Controllers.Auths
         [HttpPost("add-user")]
         public IActionResult AddUser(User user)
         {
-            var result = _userService.Add(user);
+            Core.Utilities.Results.IResult result = _userService.Add(user);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpPost("update-user")]
         public IActionResult UpdateUser(User user)
         {
-            var result = _userService.Update(user);
+            Core.Utilities.Results.IResult result = _userService.Update(user);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpPost("delete-user")]
         public IActionResult DeleteUser(User user)
         {
-            var result = _userService.Delete(user);
+            Core.Utilities.Results.IResult result = _userService.Delete(user);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpPut("update-infos")]
         public IActionResult UpdateInfos(User user)
         {
-            var result = _userService.UpdateInfos(user);
+            Core.Utilities.Results.IResult result = _userService.UpdateInfos(user);
             if (result.Success)
             {
                 return Ok(result);
@@ -49,7 +49,7 @@ namespace WebAPI.Controllers.Auths
         [HttpGet("get-by-id")]
         public IActionResult GetById(int id)
         {
-            var result = _userService.GetById(id);
+            Core.Utilities.Results.IDataResult<User> result = _userService.GetById(id);
             if (result.Success)
             {
                 return Ok(result);
@@ -59,19 +59,19 @@ namespace WebAPI.Controllers.Auths
         [HttpGet("get-user-by-email")]
         public IActionResult GetByEmail(string email)
         {
-            var result = _userService.GetUserByEmail(email);
+            Core.Utilities.Results.IDataResult<User> result = _userService.GetUserByEmail(email);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpPost("send-password-reset-mail")]
         public IActionResult SendEmail(string email)
         {
-            var result = _authService.SendResetCodeMail(email);
+            Core.Utilities.Results.IResult result = _authService.SendResetCodeMail(email);
             return result.Success ? Ok(result) : BadRequest(result);
         }
         [HttpPost("confirm-password-reset-code")]
         public IActionResult ConfirmPasswordResetCode(ConfirmPasswordResetDto confirmPasswordResetDto)
         {
-            var result = _resetPasswordCodeService.ConfirmResetCodeWithUserId(confirmPasswordResetDto);
+            Core.Utilities.Results.IResult result = _resetPasswordCodeService.ConfirmResetCodeWithUserId(confirmPasswordResetDto);
             return result.Success ? Ok(result) : BadRequest(result);
         }
     }

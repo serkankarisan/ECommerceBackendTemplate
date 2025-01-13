@@ -18,7 +18,7 @@ namespace WebAPI.Controllers
         [HttpPost("add-product-image-by-product-id")]
         public IActionResult AddProductImageByProductId([FromForm] AddProductImageDto addProductImageDto)
         {
-            var result = _productImageService.AddProductImageByProductId(addProductImageDto);
+            Core.Utilities.Results.IResult result = _productImageService.AddProductImageByProductId(addProductImageDto);
             return result.Success ? Ok(result) : BadRequest(result);
         }
     }

@@ -21,35 +21,35 @@ namespace Business.Concrete
         #region Queries
         public IDataResult<ProductImage> Get(int id)
         {
-            var result = _productImageDal.Get(p => p.Id == id);
+            ProductImage result = _productImageDal.Get(p => p.Id == id);
             return result != null ? new SuccessDataResult<ProductImage>(result, Messages.Listed) : new ErrorDataResult<ProductImage>(Messages.NotListed);
         }
         public IDataResult<List<ProductImage>> GetAll()
         {
-            var result = _productImageDal.GetAll();
+            List<ProductImage> result = _productImageDal.GetAll();
             return result != null ? new SuccessDataResult<List<ProductImage>>(result, Messages.Listed) : new ErrorDataResult<List<ProductImage>>(Messages.NotListed);
         }
         #endregion
         #region Commands
         public IResult Add(ProductImage productImage)
         {
-            var result = _productImageDal.Add(productImage);
+            bool result = _productImageDal.Add(productImage);
             return result ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
         }
         public IResult Delete(int id)
         {
-            var productImage = _productImageDal.Get(p => p.Id == id);
+            ProductImage productImage = _productImageDal.Get(p => p.Id == id);
             if (productImage == null)
                 return new ErrorResult(Messages.NotFound);
-            var result = _productImageDal.Delete(productImage);
+            bool result = _productImageDal.Delete(productImage);
             return result ? new SuccessResult(Messages.Deleted) : new ErrorResult(Messages.NotDeleted);
         }
         public IResult Update(ProductImage productImage)
         {
-            var getProductImage = _productImageDal.Get(p => p.Id == productImage.Id);
+            ProductImage getProductImage = _productImageDal.Get(p => p.Id == productImage.Id);
             if (getProductImage == null)
                 return new ErrorResult(Messages.NotFound);
-            var result = _productImageDal.Update(productImage);
+            bool result = _productImageDal.Update(productImage);
             return result ? new SuccessResult(Messages.Updated) : new ErrorResult(Messages.NotUpdated);
         }
         public IResult AddProductImageByProductId(AddProductImageDto addProductImageDto)
@@ -57,7 +57,7 @@ namespace Business.Concrete
             bool uploadingResult = false;
             for (int i = 0; i < addProductImageDto.IFormFiles.Count(); i++)
             {
-                var imageResult = _productImageUploadService.AddImage(addProductImageDto.IFormFiles[i]);
+                (string, bool) imageResult = _productImageUploadService.AddImage(addProductImageDto.IFormFiles[i]);
                 if (imageResult.Item2)
                 {
                     uploadingResult = Add(new ProductImage { ImageUrl = imageResult.Item1, Name = imageResult.Item1, ProductId = addProductImageDto.ProductId }).Success;

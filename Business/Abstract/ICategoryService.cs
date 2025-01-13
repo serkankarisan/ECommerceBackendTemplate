@@ -9,11 +9,10 @@ namespace Business.Abstract
     public interface ICategoryService
     {
         #region Queries
-        IDataResult<CategoryDto> Get(Expression<Func<Category, bool>> filter);
+        Task<IDataResult<CategoryDto>> GetAsync(Expression<Func<Category, bool>> filter);
         Task<IDataResult<Paginate<CategoryDto>>> GetAllAsync(int index, int size);
         Task<IDataResult<CategoryDto>> GetByCategoryIdAsync(int categoryId);
         Task<IDataResult<List<CategoryDto>>> GetChildCategoriesByCategoryId(int categoryId);
-        bool CategoryIsExist(string name);
         #endregion
         #region Commands
         IDataResult<CategoryDto> AddWithDto(AddCategoryDto addCategoryDto);

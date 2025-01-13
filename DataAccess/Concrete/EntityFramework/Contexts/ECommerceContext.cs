@@ -46,13 +46,13 @@ namespace DataAccess.Concrete.EntityFramework.Contexts
         #endregion
         public override int SaveChanges()
         {
-            var entries = ChangeTracker
+            IEnumerable<Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry> entries = ChangeTracker
         .Entries()
         .Where(e => e.Entity is BaseEntity && (
                 e.State == EntityState.Added
                 || e.State == EntityState.Modified));
 
-            foreach (var entityEntry in entries)
+            foreach (Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry? entityEntry in entries)
             {
                 ((BaseEntity)entityEntry.Entity).UpdatedDate = DateTime.Now;
 

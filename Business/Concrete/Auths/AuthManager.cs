@@ -30,7 +30,7 @@ namespace Business.Concrete.Auths
         {
             byte[] passwordHash, passwordSalt;
             HashingHelper.CreatePasswordHash(password, out passwordHash, out passwordSalt);
-            var user = new User
+            User user = new User
             {
                 Email = userForRegisterDto.Email,
                 FirstName = userForRegisterDto.FirstName,
@@ -39,7 +39,7 @@ namespace Business.Concrete.Auths
                 PasswordSalt = passwordSalt,
                 Status = true
             };
-            var result = _userService.Add(user);
+            IResult result = _userService.Add(user);
             if (result.Success)
             {
                 _basketDal.Add(new Basket { UserId = user.Id });
@@ -48,7 +48,7 @@ namespace Business.Concrete.Auths
         }
         public IDataResult<User> Login(UserForLoginDto userForLoginDto)
         {
-            var userToCheck = _userService.GetByMail(userForLoginDto.Email);
+            User userToCheck = _userService.GetByMail(userForLoginDto.Email);
             if (userToCheck == null)
             {
                 return new ErrorDataResult<User>(Messages.UserNotFound);
@@ -63,9 +63,9 @@ namespace Business.Concrete.Auths
         }
         public IDataResult<UserForUpdateDto> Update(UserForUpdateDto userForUpdate)
         {
-            var currentCustomer = _userService.GetById(userForUpdate.UserId);
+            IDataResult<User> currentCustomer = _userService.GetById(userForUpdate.UserId);
 
-            var user = new User
+            User user = new User
             {
                 Id = userForUpdate.UserId,
                 Email = userForUpdate.Email,
@@ -88,14 +88,14 @@ namespace Business.Concrete.Auths
         }
         public IDataResult<AccessToken> CreateAccessToken(User user)
         {
-            var claims = _userService.GetClaims(user);
-            var accessToken = _tokenHelper.CreateToken(user, claims);
+            List<OperationClaim> claims = _userService.GetClaims(user);
+            AccessToken accessToken = _tokenHelper.CreateToken(user, claims);
             return new SuccessDataResult<AccessToken>(accessToken, Messages.AccessTokenCreated);
         }
         public IResult ChangePassword(ChangePasswordDto changePasswordDto)
         {
             byte[] passwordHash, passwordSalt;
-            var userToCheck = _userService.GetById(changePasswordDto.UserId).Data;
+            User userToCheck = _userService.GetById(changePasswordDto.UserId).Data;
             if (userToCheck == null)
             {
                 return new ErrorResult(Messages.UserNotFound);
@@ -113,11 +113,11 @@ namespace Business.Concrete.Auths
         public IResult PasswordReset(PasswordResetDto passwordResetDto)
         {
             _resetPasswordCodeService.ConfirmResetCode(passwordResetDto.Code);
-            var resetPassword = _resetPasswordCodeService.GetByCode(passwordResetDto.Code);
+            IDataResult<ResetPasswordCode> resetPassword = _resetPasswordCodeService.GetByCode(passwordResetDto.Code);
             resetPassword.Data.IsActive = false;
 
             byte[] passwordHash, passwordSalt;
-            var userToCheck = _userService.GetById(passwordResetDto.UserId).Data;
+            User userToCheck = _userService.GetById(passwordResetDto.UserId).Data;
             if (userToCheck == null)
             {
                 return new ErrorResult(Messages.UserNotFound);
@@ -149,7 +149,7 @@ namespace Business.Concrete.Auths
             };
             if (_resetPasswordCodeService.Add(resetPasswordCode).Success)
             {
-                var result = _mailService.SendPasswordResetMailAsync(resetPasswordCode);
+                IResult result = _mailService.SendPasswordResetMailAsync(resetPasswordCode);
                 if (result.Success) { return new SuccessResult("Mail Gönderilmiştir."); }
             };
             return new ErrorResult("Bir hata oluştu");

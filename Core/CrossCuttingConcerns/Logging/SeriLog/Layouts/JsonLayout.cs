@@ -10,7 +10,7 @@ namespace Core.CrossCuttingConcerns.Logging.SeriLog.Layouts
         public void Format(LogEvent logEvent, TextWriter writer)
         {
             // JSON serileştirme seçenekleri
-            var options = new JsonSerializerOptions
+            JsonSerializerOptions options = new JsonSerializerOptions
             {
                 WriteIndented = true // JSON çıktısını girintili hale getir
             };
@@ -26,7 +26,7 @@ namespace Core.CrossCuttingConcerns.Logging.SeriLog.Layouts
             };
 
             // Log verilerini JSON formatında serileştir
-            var json = JsonSerializer.Serialize(logEventProperties, options);
+            string json = JsonSerializer.Serialize(logEventProperties, options);
 
             // JSON formatındaki logu yazdır
             writer.WriteLine(json);

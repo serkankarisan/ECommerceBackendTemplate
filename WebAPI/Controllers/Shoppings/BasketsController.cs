@@ -18,13 +18,13 @@ namespace WebAPI.Controllers.Shopping
         [HttpGet("getall")]
         public async Task<IActionResult> GetAllAsync(int index, int size)
         {
-            var result = await _basketService.GetAllAsync(index, size);
+            Core.Utilities.Results.IDataResult<Core.Utilities.Paging.IPaginate<Basket>> result = await _basketService.GetAllAsync(index, size);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpGet("get-by-id")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            var result = await _basketService.GetByIdAsync(id);
+            Core.Utilities.Results.IDataResult<Basket> result = await _basketService.GetByIdAsync(id);
             return result.Success ? Ok(result) : BadRequest();
         }
         #endregion
@@ -32,19 +32,19 @@ namespace WebAPI.Controllers.Shopping
         [HttpPost("add")]
         public async Task<IActionResult> AddAsync(AddBasketDto addBasketDto)
         {
-            var result = await _basketService.AddAsync(addBasketDto);
+            Core.Utilities.Results.IResult result = await _basketService.AddAsync(addBasketDto);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpPost("update")]
         public async Task<IActionResult> UpdateAsync(Basket basket)
         {
-            var result = await _basketService.UpdateAsync(basket);
+            Core.Utilities.Results.IResult result = await _basketService.UpdateAsync(basket);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpPost("delete")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
-            var result = await _basketService.DeleteAsync(id);
+            Core.Utilities.Results.IResult result = await _basketService.DeleteAsync(id);
             return result.Success ? Ok(result) : BadRequest();
         }
         #endregion

@@ -17,13 +17,13 @@ namespace WebAPI.Controllers.Addresses
         [HttpGet("getall")]
         public async Task<IActionResult> GetAllAsync(int index, int size)
         {
-            var result = await _countryService.GetAllAsync(index, size);
+            Core.Utilities.Results.IDataResult<Core.Utilities.Paging.IPaginate<Country>> result = await _countryService.GetAllAsync(index, size);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpGet("get-by-id")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            var result = await _countryService.GetByIdAsync(id);
+            Core.Utilities.Results.IDataResult<Country> result = await _countryService.GetByIdAsync(id);
             return result.Success ? Ok(result) : BadRequest();
         }
         #endregion
@@ -31,19 +31,19 @@ namespace WebAPI.Controllers.Addresses
         [HttpPost("add")]
         public async Task<IActionResult> AddAsync(Country country)
         {
-            var result = await _countryService.AddAsync(country);
+            Core.Utilities.Results.IResult result = await _countryService.AddAsync(country);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpPost("update")]
         public async Task<IActionResult> UpdateAsync(Country country)
         {
-            var result = await _countryService.UpdateAsync(country);
+            Core.Utilities.Results.IResult result = await _countryService.UpdateAsync(country);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpPost("delete")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
-            var result = await _countryService.DeleteAsync(id);
+            Core.Utilities.Results.IResult result = await _countryService.DeleteAsync(id);
             return result.Success ? Ok(result) : BadRequest();
         }
         #endregion

@@ -21,7 +21,7 @@ namespace Business.Concrete.Auths
         }
         public IResult ConfirmResetCode(string code)
         {
-            var result = _resetPasswordCodeDal.Get(p => p.Code == code);
+            ResetPasswordCode result = _resetPasswordCodeDal.Get(p => p.Code == code);
             if (result.IsActive == false) { return new ErrorResult("link geçersizdir"); }
 
             bool IsAvailable;
@@ -32,7 +32,7 @@ namespace Business.Concrete.Auths
         }
         public IResult ConfirmResetCodeWithUserId(ConfirmPasswordResetDto confirmPasswordResetDto)
         {
-            var result = _resetPasswordCodeDal.Get(p => p.Code == confirmPasswordResetDto.Code);
+            ResetPasswordCode result = _resetPasswordCodeDal.Get(p => p.Code == confirmPasswordResetDto.Code);
 
             if (result.UserId != confirmPasswordResetDto.UserId) { return new ErrorResult("link geçersizdir"); }
 

@@ -37,10 +37,10 @@ namespace DataAccess.Concrete.EntityFramework
             using (ECommerceContext context = new ECommerceContext())
             {
                 IQueryable<Category> queryable = context.Set<Category>().AsQueryable();
-                var category = await queryable.FirstOrDefaultAsync(p => p.Id == categoryId);
-                if (category != null)
+                bool categoryExists = await queryable.AnyAsync(p => p.Id == categoryId);
+                if (categoryExists)
                 {
-                    return category.SubCategories.ToList();
+                    return queryable.Where(q => q.ParentCategoryId == categoryId).ToList();
                 }
                 return new List<Category>();
             }

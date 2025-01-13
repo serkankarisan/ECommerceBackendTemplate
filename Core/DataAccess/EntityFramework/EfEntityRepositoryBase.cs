@@ -16,7 +16,7 @@ namespace Core.DataAccess.EntityFramework
         {
             using (TContext context = new TContext())
             {
-                var datas = filter == null ? context.Set<TEntity>()
+                IQueryable<TEntity> datas = filter == null ? context.Set<TEntity>()
                     : context.Set<TEntity>().Where(filter);
                 return datas.ToClearCircularList();
             }
@@ -49,7 +49,7 @@ namespace Core.DataAccess.EntityFramework
         {
             using (TContext context = new TContext())
             {
-                var addedEntity = context.Entry(entity);
+                Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<TEntity> addedEntity = context.Entry(entity);
                 addedEntity.State = EntityState.Added;
                 return context.SaveChanges() > 0;
             }
@@ -66,7 +66,7 @@ namespace Core.DataAccess.EntityFramework
         {
             using (TContext context = new TContext())
             {
-                var updatedEntity = context.Entry(entity);
+                Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<TEntity> updatedEntity = context.Entry(entity);
                 updatedEntity.State = EntityState.Modified;
                 return context.SaveChanges() > 0;
             }
@@ -75,7 +75,7 @@ namespace Core.DataAccess.EntityFramework
         {
             using (TContext context = new TContext())
             {
-                var deletedEntity = context.Entry(entity);
+                Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<TEntity> deletedEntity = context.Entry(entity);
                 deletedEntity.State = EntityState.Deleted;
                 return context.SaveChanges() > 0;
             }
@@ -94,7 +94,7 @@ namespace Core.DataAccess.EntityFramework
                                      IIncludableQueryable<TEntity, object>>? include = null, bool enableTracking = true,
                                      CancellationToken cancellationToken = default)
         {
-            using (var context = new TContext())
+            using (TContext context = new TContext())
             {
                 IQueryable<TEntity> queryable = context.Set<TEntity>().AsQueryable();
                 if (!enableTracking) queryable = queryable.AsNoTracking();
@@ -108,7 +108,7 @@ namespace Core.DataAccess.EntityFramework
                                                       int index = 0, int size = 10, bool enableTracking = true,
                                                       CancellationToken cancellationToken = default)
         {
-            using (var context = new TContext())
+            using (TContext context = new TContext())
             {
                 IQueryable<TEntity> queryable = context.Set<TEntity>().AsQueryable();
                 if (!enableTracking) queryable = queryable.AsNoTracking();
@@ -128,7 +128,7 @@ namespace Core.DataAccess.EntityFramework
                                                                bool enableTracking = true,
                                                                CancellationToken cancellationToken = default)
         {
-            using (var context = new TContext())
+            using (TContext context = new TContext())
             {
                 IQueryable<TEntity> queryable = context.Set<TEntity>().AsQueryable().ToDynamic(dynamic);
                 if (!enableTracking) queryable = queryable.AsNoTracking();

@@ -19,13 +19,13 @@ namespace WebAPI.Controllers.Shopping
         [HttpGet("getall")]
         public async Task<IActionResult> GetAllAsync(int index, int size)
         {
-            var result = await _orderItemService.GetAllAsync(index, size);
+            Core.Utilities.Results.IDataResult<Core.Utilities.Paging.IPaginate<OrderItem>> result = await _orderItemService.GetAllAsync(index, size);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpGet("get-by-id")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            var result = await _orderItemService.GetByIdAsync(id);
+            Core.Utilities.Results.IDataResult<OrderItem> result = await _orderItemService.GetByIdAsync(id);
             return result.Success ? Ok(result) : BadRequest();
         }
         #endregion
@@ -33,19 +33,19 @@ namespace WebAPI.Controllers.Shopping
         [HttpPost("add")]
         public async Task<IActionResult> AddAsync(AddOrderItemDto addOrderItemDto)
         {
-            var result = await _orderItemService.AddAsync(addOrderItemDto);
+            Core.Utilities.Results.IResult result = await _orderItemService.AddAsync(addOrderItemDto);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpPost("update")]
         public async Task<IActionResult> UpdateAsync(OrderItem orderItem)
         {
-            var result = await _orderItemService.UpdateAsync(orderItem);
+            Core.Utilities.Results.IResult result = await _orderItemService.UpdateAsync(orderItem);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpPost("delete")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
-            var result = await _orderItemService.DeleteAsync(id);
+            Core.Utilities.Results.IResult result = await _orderItemService.DeleteAsync(id);
             return result.Success ? Ok(result) : BadRequest();
         }
         #endregion

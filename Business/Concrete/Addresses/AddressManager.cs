@@ -21,48 +21,48 @@ namespace Business.Concrete.Addresses
         #region Queries
         public async Task<IDataResult<IPaginate<Address>>> GetAllAsync(int index, int size)
         {
-            var result = await _addressDal.GetListAsync(index: index, size: size);
+            IPaginate<Address>? result = await _addressDal.GetListAsync(index: index, size: size);
             return result != null ? new SuccessDataResult<IPaginate<Address>>(result, Messages.Listed) : new ErrorDataResult<IPaginate<Address>>(result, Messages.NotListed);
         }
         public async Task<IDataResult<IPaginate<Address>>> GetAllByUserIdAsync(int index, int size, int userId)
         {
-            var result = await _addressDal.GetListAsync(index: index, size: size, predicate: p => p.UserId == userId);
+            IPaginate<Address> result = await _addressDal.GetListAsync(index: index, size: size, predicate: p => p.UserId == userId);
             return result.Count != 0 ? new SuccessDataResult<IPaginate<Address>>(result, Messages.Listed) : new ErrorDataResult<IPaginate<Address>>(result, Messages.NotListed);
         }
         public async Task<IDataResult<Address>> GetByIdAsync(int id)
         {
-            var result = await _addressDal.GetAsync(p => p.Id == id);
+            Address? result = await _addressDal.GetAsync(p => p.Id == id);
             return result != null ? new SuccessDataResult<Address>(result, Messages.Listed) : new ErrorDataResult<Address>(result, Messages.NotListed);
         }
         public async Task<IDataResult<Address>> GetByUserIdAsync(int userId)
         {
-            var result = await _addressDal.GetAsync(p => p.UserId == userId);
+            Address? result = await _addressDal.GetAsync(p => p.UserId == userId);
             return result != null ? new SuccessDataResult<Address>(result, Messages.Listed) : new ErrorDataResult<Address>(result, Messages.NotListed);
         }
         #endregion
         #region Commands
         public async Task<IResult> UpdateAsync(Address address)
         {
-            var updatedAddress = await _addressDal.GetAsync(p => p.Id == address.Id);
+            Address? updatedAddress = await _addressDal.GetAsync(p => p.Id == address.Id);
             if (updatedAddress == null)
                 return new ErrorResult(Messages.NotFound);
 
-            var result = await _addressDal.UpdateAsync(updatedAddress);
+            Address result = await _addressDal.UpdateAsync(updatedAddress);
             return result != null ? new SuccessResult(Messages.Updated) : new ErrorResult(Messages.NotUpdated);
         }
         public async Task<IResult> AddAsync(AddAddressDto addAddressDto)
         {
             Address address = _mapper.Map<Address>(addAddressDto);
-            var result = await _addressDal.AddAsync(address);
+            Address result = await _addressDal.AddAsync(address);
             return result != null ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
         }
         public async Task<IResult> DeleteAsync(int id)
         {
-            var deletedAddress = await _addressDal.GetAsync(p => p.Id == id);
+            Address? deletedAddress = await _addressDal.GetAsync(p => p.Id == id);
             if (deletedAddress == null)
                 return new ErrorResult(Messages.NotFound);
 
-            var result = await _addressDal.DeleteAsync(deletedAddress);
+            Address result = await _addressDal.DeleteAsync(deletedAddress);
             return result != null ? new SuccessResult(Messages.Deleted) : new ErrorResult(Messages.NotDeleted);
         }
         #endregion

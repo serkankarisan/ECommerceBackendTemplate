@@ -33,7 +33,7 @@ namespace Business.Utilities.Mail
         {
             MailMessage mail = new MailMessage();
             mail.IsBodyHtml = isBodyHtml;
-            foreach (var to in tos)
+            foreach (string to in tos)
                 mail.To.Add(to);
             mail.Subject = subject;
             mail.Body = body;

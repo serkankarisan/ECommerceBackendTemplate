@@ -18,13 +18,13 @@ namespace WebAPI.Controllers.Shopping
         [HttpGet("getall")]
         public async Task<IActionResult> GetAllAsync(int index, int size)
         {
-            var result = await _basketItemService.GetAllAsync(index, size);
+            Core.Utilities.Results.IDataResult<Core.Utilities.Paging.IPaginate<BasketItem>> result = await _basketItemService.GetAllAsync(index, size);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpGet("get-by-id")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
-            var result = await _basketItemService.GetByIdAsync(id);
+            Core.Utilities.Results.IDataResult<BasketItem> result = await _basketItemService.GetByIdAsync(id);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpGet("get-basket-items-by-user-id")]
@@ -37,19 +37,19 @@ namespace WebAPI.Controllers.Shopping
         [HttpPost("add")]
         public async Task<IActionResult> AddAsync(AddBasketItemDto basketItemDto)
         {
-            var result = await _basketItemService.AddAsync(basketItemDto);
+            Core.Utilities.Results.IResult result = await _basketItemService.AddAsync(basketItemDto);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpPost("update")]
         public async Task<IActionResult> UpdateAsync(BasketItem basketItem)
         {
-            var result = await _basketItemService.UpdateAsync(basketItem);
+            Core.Utilities.Results.IResult result = await _basketItemService.UpdateAsync(basketItem);
             return result.Success ? Ok(result) : BadRequest();
         }
         [HttpPost("delete")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
-            var result = await _basketItemService.DeleteAsync(id);
+            Core.Utilities.Results.IResult result = await _basketItemService.DeleteAsync(id);
             return result.Success ? Ok(result) : BadRequest();
         }
         #endregion

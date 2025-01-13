@@ -24,12 +24,12 @@ namespace Business.Concrete.Shoppings
         #region Queries
         public async Task<IDataResult<IPaginate<BasketItem>>> GetAllAsync(int index, int size)
         {
-            var result = await _basketItemDal.GetListAsync(index: index, size: size);
+            IPaginate<BasketItem> result = await _basketItemDal.GetListAsync(index: index, size: size);
             return new SuccessDataResult<IPaginate<BasketItem>>(result, Messages.Listed);
         }
         public async Task<IDataResult<BasketItem>> GetByIdAsync(int id)
         {
-            var result = await _basketItemDal.GetAsync(p => p.Id == id);
+            BasketItem? result = await _basketItemDal.GetAsync(p => p.Id == id);
             return result != null ? new SuccessDataResult<BasketItem>(result, Messages.Listed) : new ErrorDataResult<BasketItem>(result, Messages.NotListed);
         }
         public IDataResult<List<BasketItem>> GetBasketItemsByIdUserId(int userId)
@@ -44,17 +44,17 @@ namespace Business.Concrete.Shoppings
         #region Commands
         public async Task<IResult> UpdateAsync(BasketItem basketItem)
         {
-            var updatedBasketItem = GetByIdAsync(basketItem.Id);
+            Task<IDataResult<BasketItem>> updatedBasketItem = GetByIdAsync(basketItem.Id);
             if (updatedBasketItem == null)
             {
                 return new ErrorResult(Messages.NotFound);
             }
-            var result = await _basketItemDal.UpdateAsync(basketItem);
+            BasketItem result = await _basketItemDal.UpdateAsync(basketItem);
             return result != null ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
         }
         public async Task<IResult> AddAsync(AddBasketItemDto basketItemDto)
         {
-            var doesUserHaveBasket = await _basketDal.GetAsync(p => p.UserId == basketItemDto.UserId);
+            Basket? doesUserHaveBasket = await _basketDal.GetAsync(p => p.UserId == basketItemDto.UserId);
             if (doesUserHaveBasket == null)
             {
                 basketItemDto.BasketId = _basketDal.AddAsync(new Basket { UserId = basketItemDto.UserId }).Result.Id;
@@ -64,24 +64,24 @@ namespace Business.Concrete.Shoppings
                 basketItemDto.BasketId = doesUserHaveBasket.Id;
             }
             BasketItem basketItem = _mapper.Map<BasketItem>(basketItemDto);
-            var result = await _basketItemDal.AddAsync(basketItem);
+            BasketItem result = await _basketItemDal.AddAsync(basketItem);
             return result != null ? new SuccessResult(Messages.AddToBasket) : new ErrorResult(Messages.NotAdded);
         }
         public async Task<IResult> DeleteAsync(int id)
         {
-            var deletedBasketItem = await GetByIdAsync(id);
+            IDataResult<BasketItem> deletedBasketItem = await GetByIdAsync(id);
             if (deletedBasketItem == null)
             {
                 return new ErrorResult(Messages.NotFound);
             }
-            var result = await _basketItemDal.DeleteAsync(deletedBasketItem.Data);
+            BasketItem result = await _basketItemDal.DeleteAsync(deletedBasketItem.Data);
             return result != null ? new SuccessResult(Messages.Added) : new ErrorResult(Messages.NotAdded);
         }
         #endregion
         decimal calculateTotalPrice(List<BasketItem> basketItems)
         {
             decimal totalPrice = 0;
-            foreach (var item in basketItems)
+            foreach (BasketItem item in basketItems)
             {
                 totalPrice += item.Quantity * item.Product.Price;
             }

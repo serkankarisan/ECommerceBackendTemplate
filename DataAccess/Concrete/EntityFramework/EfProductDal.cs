@@ -13,7 +13,7 @@ namespace DataAccess.Concrete.EntityFramework
         #region Queries
         public Product GetMostExpensiveProduct()
         {
-            using (var context = new ECommerceContext())
+            using (ECommerceContext context = new ECommerceContext())
             {
                 return context.Products.OrderByDescending(m => m.Price).FirstOrDefault();
             }
@@ -28,30 +28,30 @@ namespace DataAccess.Concrete.EntityFramework
         }
         public async Task<IPaginate<ProductDetailDto>> genericProductDetailDtoAsync(Expression<Func<Product, bool>> filter = null, int index = 0, int size = 10, bool doPaginate = true)
         {
-            using (var context = new ECommerceContext())
+            using (ECommerceContext context = new ECommerceContext())
             {
-                var result = from p in filter == null ? context.Products : context.Products.Where(filter)
-                             join c in context.Categories on p.CategoryId equals c.Id
-                             join brand in context.Brands on p.BrandId equals brand.Id
-                             let images = (from images in context.ProductImages where p.Id == images.ProductId select images.ImageUrl).ToList()
-                             select new ProductDetailDto
-                             {
-                                 //Product
-                                 Id = p.Id,
-                                 Name = p.Name,
-                                 Price = p.Price,
-                                 StockQuantity = p.StockQuantity,
-                                 CreatedDate = p.CreatedDate,
-                                 UpdatedDate = p.UpdatedDate,
-                                 //Category
-                                 CategoryId = c.Id,
-                                 CategoryName = c.Name,
-                                 //Images
-                                 ProductImages = images,
-                                 //Brand
-                                 BrandId = brand.Id,
-                                 BrandName = brand.Name,
-                             };
+                IQueryable<ProductDetailDto> result = from p in filter == null ? context.Products : context.Products.Where(filter)
+                                                      join c in context.Categories on p.CategoryId equals c.Id
+                                                      join brand in context.Brands on p.BrandId equals brand.Id
+                                                      let images = (from images in context.ProductImages where p.Id == images.ProductId select images.ImageUrl).ToList()
+                                                      select new ProductDetailDto
+                                                      {
+                                                          //Product
+                                                          Id = p.Id,
+                                                          Name = p.Name,
+                                                          Price = p.Price,
+                                                          StockQuantity = p.StockQuantity,
+                                                          CreatedDate = p.CreatedDate,
+                                                          UpdatedDate = p.UpdatedDate,
+                                                          //Category
+                                                          CategoryId = c.Id,
+                                                          CategoryName = c.Name,
+                                                          //Images
+                                                          ProductImages = images,
+                                                          //Brand
+                                                          BrandId = brand.Id,
+                                                          BrandName = brand.Name,
+                                                      };
                 if (doPaginate)
                     return await result.ToPaginateAsync(index, size);
                 else
@@ -60,12 +60,12 @@ namespace DataAccess.Concrete.EntityFramework
         }
         public async Task<ProductDetailDto> GetProductDetailByIdAsync(int id)
         {
-            var result = await genericProductDetailDtoAsync(filter: p => p.Id == id, doPaginate: false);
+            IPaginate<ProductDetailDto> result = await genericProductDetailDtoAsync(filter: p => p.Id == id, doPaginate: false);
             return result.Items.Count != 0 ? result.Items.First() : null;
         }
         public int GetProductsCountFromDal()
         {
-            using (var context = new ECommerceContext())
+            using (ECommerceContext context = new ECommerceContext())
             {
                 return context.Products.Count();
             }
@@ -86,7 +86,7 @@ namespace DataAccess.Concrete.EntityFramework
                      }
                     ).Take(20).ToList();
 
-                var popularProducts = (
+                IEnumerable<ProductDetailDto> popularProducts = (
                     from r in result
                     join p in context.Products on r.Id equals p.Id
                     join c in context.Categories on p.CategoryId equals c.Id

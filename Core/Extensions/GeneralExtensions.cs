@@ -10,26 +10,26 @@ namespace Core.Extensions
     {
         public static T ClearCircularReference<T>(this T model)
         {
-            var options = new JsonSerializerOptions
+            JsonSerializerOptions options = new JsonSerializerOptions
             {
                 WriteIndented = true, // JSON çıktısını düzenli yazmak için
                 ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
             };
 
             // Serialize edip deserialize ederek circular referansı kaldırma
-            var serializeModel = JsonSerializer.Serialize(model, options);
+            string serializeModel = JsonSerializer.Serialize(model, options);
             return JsonSerializer.Deserialize<T>(serializeModel, options);
         }
         public static List<T> ToClearCircularList<T>(this IQueryable<T> items)
         {
-            var options = new JsonSerializerOptions
+            JsonSerializerOptions options = new JsonSerializerOptions
             {
                 WriteIndented = true, // JSON çıktısını düzenli yazmak için
                 ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
             };
 
             // Serialize edip deserialize ederek circular referansı kaldırma
-            var serializeModel = JsonSerializer.Serialize(items, options);
+            string serializeModel = JsonSerializer.Serialize(items, options);
             return JsonSerializer.Deserialize<List<T>>(serializeModel, options);
         }
         public static Paginate<TTarget> ToMappedPaginate<TSource, TTarget>(this IPaginate<TSource> paginateModel)

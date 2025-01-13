@@ -19,21 +19,26 @@ namespace Core.Utilities.Interceptors
         // Metod çalışırken yapılacak işlemler
         public override void Intercept(IInvocation invocation)
         {
-            OnBefore(invocation); // Method öncesi işlem
+            bool isSuccess = true;
             try
             {
+                OnBefore(invocation);// Method öncesi işlem
                 invocation.Proceed(); // Methodu çalıştır
-                OnSuccess(invocation); // Başarıyla tamamlanmışsa işlem
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                OnException(invocation, ex); // Hata durumunda işlem
+                isSuccess = false;
+                OnException(invocation, e);// Hata durumunda işlem
                 throw; // Hata dışarıya fırlatılır
             }
             finally
             {
-                OnAfter(invocation); // Her durumda yapılacak işlem
+                if (isSuccess)
+                {
+                    OnSuccess(invocation);// Başarıyla tamamlanmışsa işlem
+                }
             }
+            OnAfter(invocation);// Her durumda yapılacak işlem
         }
     }
 }

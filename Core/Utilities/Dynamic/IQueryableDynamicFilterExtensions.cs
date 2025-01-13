@@ -44,7 +44,7 @@ public static class IQueryableDynamicFilterExtensions
 
     private static IQueryable<T> Sort<T>(IQueryable<T> queryable, IEnumerable<Sort> sort)
     {
-        foreach (var item in sort)
+        foreach (Sort item in sort)
         {
             if (string.IsNullOrEmpty(item.Field)) throw new ArgumentException("Invalid Field");
             if (string.IsNullOrEmpty(item.Dir) || !_orders.Contains(item.Dir)) throw new ArgumentException("Invalid Order Type");

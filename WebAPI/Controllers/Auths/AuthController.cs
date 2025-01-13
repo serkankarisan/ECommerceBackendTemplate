@@ -19,12 +19,12 @@ namespace WebAPI.Controllers.Auths
         [HttpPost("login")]
         public ActionResult Login(UserForLoginDto userForLoginDto)
         {
-            var userToLogin = _authService.Login(userForLoginDto);
+            Core.Utilities.Results.IDataResult<Core.Entities.Concrete.Auth.User> userToLogin = _authService.Login(userForLoginDto);
             if (!userToLogin.Success)
             {
                 return BadRequest(userToLogin.Message);
             }
-            var result = _authService.CreateAccessToken(userToLogin.Data);
+            Core.Utilities.Results.IDataResult<Core.Utilities.Security.JWT.AccessToken> result = _authService.CreateAccessToken(userToLogin.Data);
             if (result.Success)
             {
                 return Ok(result);
@@ -35,13 +35,13 @@ namespace WebAPI.Controllers.Auths
         [HttpPost("register")]
         public ActionResult Register(UserForRegisterDto userForRegisterDto)
         {
-            var userExists = _authService.UserExists(userForRegisterDto.Email);
+            Core.Utilities.Results.IResult userExists = _authService.UserExists(userForRegisterDto.Email);
             if (!userExists.Success)
             {
                 return BadRequest(userExists.Message);
             }
-            var registerResult = _authService.Register(userForRegisterDto, userForRegisterDto.Password);
-            var result = _authService.CreateAccessToken(registerResult.Data);
+            Core.Utilities.Results.IDataResult<Core.Entities.Concrete.Auth.User> registerResult = _authService.Register(userForRegisterDto, userForRegisterDto.Password);
+            Core.Utilities.Results.IDataResult<Core.Utilities.Security.JWT.AccessToken> result = _authService.CreateAccessToken(registerResult.Data);
             if (result.Success)
             {
                 return Ok(result.Data);
@@ -53,8 +53,8 @@ namespace WebAPI.Controllers.Auths
         public ActionResult Update(UserForUpdateDto userForUpdate)
         {
             _authService.Update(userForUpdate);
-            var user = _userService.GetById(userForUpdate.UserId);
-            var result = _authService.CreateAccessToken(user.Data); if (result.Success)
+            Core.Utilities.Results.IDataResult<Core.Entities.Concrete.Auth.User> user = _userService.GetById(userForUpdate.UserId);
+            Core.Utilities.Results.IDataResult<Core.Utilities.Security.JWT.AccessToken> result = _authService.CreateAccessToken(user.Data); if (result.Success)
             {
                 return Ok(result);
             }
@@ -64,7 +64,7 @@ namespace WebAPI.Controllers.Auths
         [HttpPut("change-password")]
         public IActionResult ChangePassword(ChangePasswordDto changePasswordDto)
         {
-            var result = _authService.ChangePassword(changePasswordDto);
+            Core.Utilities.Results.IResult result = _authService.ChangePassword(changePasswordDto);
             if (result.Success)
             {
                 return Ok(result);
@@ -75,7 +75,7 @@ namespace WebAPI.Controllers.Auths
         [HttpPost("password-reset")]
         public IActionResult PasswordReset(PasswordResetDto passwordResetDto)
         {
-            var result = _authService.PasswordReset(passwordResetDto);
+            Core.Utilities.Results.IResult result = _authService.PasswordReset(passwordResetDto);
             if (result.Success)
             {
                 return Ok(result);

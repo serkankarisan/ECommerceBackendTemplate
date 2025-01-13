@@ -17,19 +17,29 @@ namespace Core.Aspects.Autofac.Caching
             _cacheManager = ServiceTool.ServiceProvider.GetService<ICacheManager>();
         }
 
-        public override void Intercept(IInvocation invocation)
+        public override async void Intercept(IInvocation invocation)
         {
-            var methodName = string.Format($"{invocation.Method.ReflectedType.FullName}.{invocation.Method.Name}");
-            var arguments = invocation.Arguments.ToList();
-            var key = $"{methodName}({string.Join(",", arguments.Select(x => x?.ToString() ?? "<Null>"))})";
+            string methodName = string.Format($"{invocation.Method.ReflectedType.FullName}.{invocation.Method.Name}");
+            List<object> arguments = invocation.Arguments.ToList();
+            string key = $"{methodName}({string.Join(",", arguments.Select(x => x?.ToString() ?? "<Null>"))})";
 
-            if (_cacheManager.IsAdd(key))
+            if (await _cacheManager.IsAddAsync(key))
             {
-                invocation.ReturnValue = _cacheManager.Get(key);
+                object returnValue = await _cacheManager.GetAsync(key);
+                invocation.ReturnValue = returnValue;
                 return;
             }
+            // Metodu çağır
             invocation.Proceed();
-            _cacheManager.Add(key, invocation.ReturnValue, _duration);
+
+            // Eğer metot asenkron ise ReturnValue bir Task olacaktır
+            if (invocation.Method.ReturnType.IsGenericType && invocation.Method.ReturnType.GetGenericTypeDefinition() == typeof(Task<>))
+            {
+                // Task<T> için Task'ı çöz ve sonucu cache'e ekle
+                await (Task)invocation.ReturnValue;
+            }
+            // Asenkron olmayan durumlar için
+            await _cacheManager.AddAsync(key, invocation.ReturnValue, _duration);
         }
     }
 }
