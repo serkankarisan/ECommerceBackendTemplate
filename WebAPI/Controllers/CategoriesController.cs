@@ -57,36 +57,36 @@ namespace WebAPI.Controllers
             Core.Utilities.Results.IResult result = await _categoryService.DeleteAsync(categoryId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
-        [HttpPost("add-categories-api")]
-        public async Task<IActionResult> AddCategoriesApiAsync()
-        {
-            //sadece ihtiyac duyulduğunda çalıştırılması gerek
-            //return null;
+        //[HttpPost("add-categories-api")]
+        //public async Task<IActionResult> AddCategoriesApiAsync()
+        //{
+        //    //sadece ihtiyac duyulduğunda çalıştırılması gerek
+        //    //return null;
 
-            HttpClient client = new HttpClient();
-            HttpResponseMessage response = await client.GetAsync("https://api.trendyol.com/sapigw/product-categories");
+        //    HttpClient client = new HttpClient();
+        //    HttpResponseMessage response = await client.GetAsync("https://api.trendyol.com/sapigw/product-categories");
 
-            if (response.IsSuccessStatusCode)
-            {
-                try
-                {
-                    string responseContent = await response.Content.ReadAsStringAsync();
+        //    if (response.IsSuccessStatusCode)
+        //    {
+        //        try
+        //        {
+        //            string responseContent = await response.Content.ReadAsStringAsync();
 
-                    TrendyolCategoryResponseDto apiRoot = JsonConvert.DeserializeObject<TrendyolCategoryResponseDto>(responseContent);
-                    IEnumerable<TrendyolCategoryDto> apiCategories = apiRoot.Categories;
-                    foreach (TrendyolCategoryDto category in apiCategories)
-                    {
-                        await _categoryService.AddCategoryAsync(category);
-                    }
-                }
-                catch (Exception)
-                {
-                }
-            }
-            else { }
-            return null;
+        //            TrendyolCategoryResponseDto apiRoot = JsonConvert.DeserializeObject<TrendyolCategoryResponseDto>(responseContent);
+        //            IEnumerable<TrendyolCategoryDto> apiCategories = apiRoot.Categories;
+        //            foreach (TrendyolCategoryDto category in apiCategories)
+        //            {
+        //                await _categoryService.AddCategoryAsync(category);
+        //            }
+        //        }
+        //        catch (Exception)
+        //        {
+        //        }
+        //    }
+        //    else { }
+        //    return null;
 
-        }
+        //}
         #endregion
     }
 }
